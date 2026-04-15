@@ -55,6 +55,7 @@ export function getCalendarDays(year: number, monthIndex: number) {
   const firstDay = new Date(year, monthIndex, 1);
   const firstWeekday = (firstDay.getDay() + 6) % 7;
   const startDate = new Date(year, monthIndex, 1 - firstWeekday);
+  const today = new Date();
 
   return Array.from({ length: 42 }, (_, index) => {
     const date = new Date(startDate);
@@ -64,7 +65,11 @@ export function getCalendarDays(year: number, monthIndex: number) {
       year: date.getFullYear(),
       monthIndex: date.getMonth(),
       day: date.getDate(),
-      isCurrentMonth: date.getMonth() === monthIndex
+      isCurrentMonth: date.getMonth() === monthIndex,
+      isToday:
+        date.getFullYear() === today.getFullYear() &&
+        date.getMonth() === today.getMonth() &&
+        date.getDate() === today.getDate()
     };
   });
 }

@@ -6,16 +6,16 @@ type StatCardsProps = {
 
 export function StatCards({ yellowOrange, red, total }: StatCardsProps) {
   return (
-    <div className="stat-grid">
-      <article className="stat-card">
+    <div className="stat-grid" aria-label="Synthèse des crises">
+      <article className="stat-card stat-card--amber">
         <span className="stat-card__label">Jaune + orange</span>
         <strong>{yellowOrange}</strong>
       </article>
-      <article className="stat-card">
+      <article className="stat-card stat-card--red">
         <span className="stat-card__label">Rouge</span>
         <strong>{red}</strong>
       </article>
-      <article className="stat-card">
+      <article className="stat-card stat-card--total">
         <span className="stat-card__label">Total</span>
         <strong>{total}</strong>
       </article>

@@ -27,12 +27,13 @@ export function CalendarPage() {
   const title = view === "month" ? getMonthLabel(year, monthIndex) : String(year);
   const previousStep = view === "month" ? -1 : -12;
   const nextStep = view === "month" ? 1 : 12;
+  const periodLabel = view === "month" ? "Période mensuelle" : "Période annuelle";
 
   return (
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">Vue principale</p>
+          <p className="eyebrow">{periodLabel}</p>
           <h2>{title}</h2>
         </div>
 
@@ -73,24 +74,32 @@ export function CalendarPage() {
 
       {firebaseReady && !loading && !error ? (
         <>
-          <div className="period-switcher" aria-label="Changer de période">
+          <div className="period-switcher period-switcher--compact" aria-label="Changer de période">
             <button
               type="button"
-              className="ghost-button"
+              className="ghost-button ghost-button--nav"
               onClick={() =>
                 setCurrentMonth((value) => shiftMonth(value.year, value.monthIndex, previousStep))
               }
+              aria-label={view === "month" ? "Afficher le mois précédent" : "Afficher l’année précédente"}
             >
-              {view === "month" ? "Mois précédent" : "Année précédente"}
+              <span aria-hidden="true">←</span>
+              <span>{view === "month" ? "Précédent" : "Précédente"}</span>
             </button>
+            <div className="period-switcher__current">
+              <span className="period-switcher__label">{view === "month" ? "Mois affiché" : "Année affichée"}</span>
+              <strong>{title}</strong>
+            </div>
             <button
               type="button"
-              className="ghost-button"
+              className="ghost-button ghost-button--nav"
               onClick={() =>
                 setCurrentMonth((value) => shiftMonth(value.year, value.monthIndex, nextStep))
               }
+              aria-label={view === "month" ? "Afficher le mois suivant" : "Afficher l’année suivante"}
             >
-              {view === "month" ? "Mois suivant" : "Année suivante"}
+              <span>{view === "month" ? "Suivant" : "Suivante"}</span>
+              <span aria-hidden="true">→</span>
             </button>
           </div>
 

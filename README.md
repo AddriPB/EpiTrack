@@ -141,6 +141,11 @@ En local, vous pouvez laisser :
 VITE_BASE_PATH=/
 ```
 
+Note :
+
+- Le code source contient actuellement des valeurs Firebase de repli dans `src/services/firebase/config.ts`.
+- Pour un usage maîtrisé, il reste recommandé de renseigner explicitement `.env.local` en local et les secrets GitHub Actions en production.
+
 ## Lancement local
 
 ```bash
@@ -166,6 +171,12 @@ Principe :
 - les secrets Firebase sont injectés via GitHub Actions
 - le dossier `dist/` est publié sur GitHub Pages
 
+Prérequis côté GitHub :
+
+- dans `Settings > Pages`, sélectionner `GitHub Actions` comme source de déploiement
+- vérifier que les secrets du dépôt listés plus bas sont bien définis
+- l’URL attendue de la page est de la forme `https://<user>.github.io/<repo>/`
+
 ## Configuration Firebase / Firestore
 
 ### 1. Créer le projet Firebase
@@ -184,6 +195,11 @@ Principe :
 
 - Activer le provider `Email/Password`
 - La création de compte est gérée directement dans l’application
+- Ajouter le domaine GitHub Pages utilisé par l’application dans les domaines autorisés Firebase Authentication
+
+Exemple pour ce dépôt :
+
+- `addripb.github.io`
 
 ### 4. Structure des données
 
@@ -215,6 +231,10 @@ Dans GitHub, ajouter ces secrets de dépôt :
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 
+Note :
+
+- si ces secrets sont absents, le workflow peut construire l’application avec la configuration de repli présente dans le code, ce qui est possible mais moins explicite à maintenir
+
 ## Comportement produit implémenté
 
 - ajout d’une crise avec date, couleur et observation facultative
@@ -245,5 +265,9 @@ Dans GitHub, ajouter ces secrets de dépôt :
 - pas d’édition / suppression
 - pas de statistiques détaillées
 - pas de mode hors-ligne complet, seulement un shell PWA minimal
+
+Note :
+
+- le service worker présent est volontairement simple ; si le comportement de mise à jour en production devient critique, cette partie devra être renforcée
 
 Ces éléments sont laissés hors scope pour garder une base simple et propre.

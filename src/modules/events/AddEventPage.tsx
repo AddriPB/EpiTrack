@@ -97,7 +97,10 @@ export function AddEventPage() {
           <legend>Couleur</legend>
           <div className="color-picker" role="radiogroup" aria-label="Choisir une couleur">
             {EVENT_COLORS.map((item) => (
-              <label key={item.value} className="color-choice">
+              <label
+                key={item.value}
+                className={`color-choice${color === item.value ? " color-choice--selected" : ""}`}
+              >
                 <input
                   type="radio"
                   name="color"

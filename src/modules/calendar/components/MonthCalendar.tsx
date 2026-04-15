@@ -16,6 +16,14 @@ export function MonthCalendar({ year, monthIndex, events }: MonthCalendarProps) 
 
   return (
     <div className="calendar-card">
+      <div className="calendar-card__header">
+        <div>
+          <p className="section-label">Répartition quotidienne</p>
+          <h3>{getMonthLabelShort(year, monthIndex)}</h3>
+        </div>
+        <span className="calendar-card__meta">{events.length} crise(s)</span>
+      </div>
+
       <div className="calendar-grid calendar-grid--labels" aria-hidden="true">
         {weekdayLabels.map((label) => (
           <div key={label} className="calendar-label">
@@ -33,7 +41,9 @@ export function MonthCalendar({ year, monthIndex, events }: MonthCalendarProps) 
           return (
             <article
               key={day.dateKey}
-              className={`calendar-day${day.isCurrentMonth ? "" : " calendar-day--muted"}`}
+              className={`calendar-day${day.isCurrentMonth ? "" : " calendar-day--muted"}${
+                day.isToday ? " calendar-day--today" : ""
+              }`}
               role="gridcell"
               aria-label={`${day.day} ${getMonthLabelShort(day.year, day.monthIndex)}${
                 dayEvents.length ? `, ${dayEvents.length} crise(s)` : ""
