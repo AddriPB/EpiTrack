@@ -14,6 +14,7 @@ const navItems = [
 
 export function AppShell({ children, showFab }: AppShellProps) {
   const { signOutUser, user } = useAuth();
+  const pseudo = user?.displayName || user?.email?.split("@")[0] || null;
 
   return (
     <div className="app-shell">
@@ -22,7 +23,7 @@ export function AppShell({ children, showFab }: AppShellProps) {
           <div>
             <p className="eyebrow">Suivi des crises</p>
             <h1>EpiTrack</h1>
-            {user?.email ? <p className="app-header__meta">{user.email}</p> : null}
+            {pseudo ? <p className="app-header__meta">{pseudo}</p> : null}
           </div>
 
           <button

@@ -4,8 +4,8 @@
   "description": "Suivi simple des crises d’épilepsie",
   "start_url": ".",
   "display": "standalone",
-  "background_color": "#f6f3ec",
-  "theme_color": "#f6f3ec",
+  "background_color": "#0f1620",
+  "theme_color": "#0f1620",
   "icons": [
     {
       "src": "./pwa-192.svg",

@@ -84,7 +84,6 @@ export function CalendarPage() {
               aria-label={view === "month" ? "Afficher le mois précédent" : "Afficher l’année précédente"}
             >
               <span aria-hidden="true">←</span>
-              <span>{view === "month" ? "Précédent" : "Précédente"}</span>
             </button>
             <div className="period-switcher__current">
               <span className="period-switcher__label">{view === "month" ? "Mois affiché" : "Année affichée"}</span>
@@ -98,7 +97,6 @@ export function CalendarPage() {
               }
               aria-label={view === "month" ? "Afficher le mois suivant" : "Afficher l’année suivante"}
             >
-              <span>{view === "month" ? "Suivant" : "Suivante"}</span>
               <span aria-hidden="true">→</span>
             </button>
           </div>

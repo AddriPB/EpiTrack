@@ -1,7 +1,9 @@
 import { FirebaseError } from "firebase/app";
+import { updateProfile } from "firebase/auth";
 import { FormEvent, useState } from "react";
 import { ErrorState } from "../../shared/components/ErrorState";
 import { useAuth } from "../../services/auth/AuthContext";
+import { getFirebaseAuth } from "../../services/firebase/config";
 
 type AuthMode = "signin" | "signup";
 
@@ -10,7 +12,7 @@ const MIN_PASSWORD_LENGTH = 6;
 export function AuthPage() {
   const { firebaseReady, signInWithEmail, signUpWithEmail } = useAuth();
   const [mode, setMode] = useState<AuthMode>("signin");
-  const [email, setEmail] = useState("");
+  const [pseudo, setPseudo] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -28,14 +30,25 @@ export function AuthPage() {
       return;
     }
 
+    const normalizedPseudo = normalizePseudo(pseudo);
+
+    if (!normalizedPseudo) {
+      setError("Pseudo invalide.");
+      return;
+    }
+
     setSubmitting(true);
     setError(null);
 
     try {
       if (mode === "signin") {
-        await signInWithEmail(email.trim(), password);
+        await signInWithEmail(buildPseudoEmail(normalizedPseudo), password);
       } else {
-        await signUpWithEmail(email.trim(), password);
+        await signUpWithEmail(buildPseudoEmail(normalizedPseudo), password);
+        const currentUser = getFirebaseAuth().currentUser;
+        if (currentUser) {
+          await updateProfile(currentUser, { displayName: pseudo.trim() });
+        }
       }
     } catch (submissionError) {
       setError(getAuthErrorMessage(submissionError));
@@ -58,11 +71,8 @@ export function AuthPage() {
   return (
     <section className="page-section page-section--narrow auth-page">
       <div className="auth-hero">
-        <p className="eyebrow">Espace personnel</p>
         <h1>EpiTrack</h1>
-        <p className="auth-hero__text">
-          Connectez-vous pour accéder à votre suivi, ou créez un compte pour démarrer.
-        </p>
+        <p className="auth-hero__text">Connexion rapide à votre espace.</p>
       </div>
 
       <div className="auth-card">
@@ -91,13 +101,15 @@ export function AuthPage() {
 
         <form className="form-card" onSubmit={handleSubmit}>
           <label className="field">
-            <span>Email</span>
+            <span>Pseudo</span>
             <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="vous@exemple.com"
-              autoComplete="email"
+              type="text"
+              value={pseudo}
+              onChange={(event) => setPseudo(event.target.value)}
+              placeholder="Votre pseudo"
+              autoCapitalize="none"
+              autoCorrect="off"
+              autoComplete="username"
               required
             />
           </label>
@@ -136,13 +148,13 @@ function getAuthErrorMessage(error: unknown) {
 
   switch (error.code) {
     case "auth/email-already-in-use":
-      return "Cette adresse email est déjà utilisée.";
+      return "Ce pseudo est déjà utilisé.";
     case "auth/invalid-email":
-      return "Adresse email invalide.";
+      return "Pseudo invalide.";
     case "auth/invalid-credential":
     case "auth/user-not-found":
     case "auth/wrong-password":
-      return "Email ou mot de passe incorrect.";
+      return "Pseudo ou mot de passe incorrect.";
     case "auth/weak-password":
       return "Le mot de passe est trop faible.";
     case "auth/too-many-requests":
@@ -150,4 +162,17 @@ function getAuthErrorMessage(error: unknown) {
     default:
       return "Action impossible pour le moment.";
   }
+}
+
+function normalizePseudo(value: string) {
+  return value
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, "");
+}
+
+function buildPseudoEmail(pseudo: string) {
+  return `${pseudo}@epitrack.local`;
 }

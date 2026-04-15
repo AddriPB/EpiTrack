@@ -8,11 +8,11 @@ export function StatCards({ yellowOrange, red, total }: StatCardsProps) {
   return (
     <div className="stat-grid" aria-label="Synthèse des crises">
       <article className="stat-card stat-card--amber">
-        <span className="stat-card__label">Jaune + orange</span>
+        <span className="stat-card__label">Légère + moyenne</span>
         <strong>{yellowOrange}</strong>
       </article>
       <article className="stat-card stat-card--red">
-        <span className="stat-card__label">Rouge</span>
+        <span className="stat-card__label">Grave</span>
         <strong>{red}</strong>
       </article>
       <article className="stat-card stat-card--total">
