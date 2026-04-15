@@ -20,8 +20,10 @@ export function YearSummaryGrid({ year, months }: YearSummaryGridProps) {
         {months.map((month) => (
           <article key={month.monthKey} className="year-card">
             <p className="year-card__label">{month.label}</p>
-            <strong className="year-card__value">{month.total}</strong>
-            <span className="year-card__meta">crise(s)</span>
+            <div className="year-card__summary">
+              <strong className="year-card__value">{month.total}</strong>
+              <span className="year-card__meta">crises</span>
+            </div>
           </article>
         ))}
       </div>

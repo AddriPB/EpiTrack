@@ -8,22 +8,21 @@ type AppShellProps = PropsWithChildren<{
 }>;
 
 const navItems = [
-  { to: "/calendar", label: "Calendrier" },
-  { to: "/add", label: "Ajouter" }
+  { to: "/calendar", label: "Calendrier" }
 ];
 
 export function AppShell({ children, showFab }: AppShellProps) {
-  const { signOutUser, user } = useAuth();
-  const pseudo = user?.displayName || user?.email?.split("@")[0] || null;
+  const { signOutUser } = useAuth();
 
   return (
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header__row">
           <div>
-            <p className="eyebrow">Suivi des crises</p>
-            <h1>EpiTrack</h1>
-            {pseudo ? <p className="app-header__meta">{pseudo}</p> : null}
+            <h1 className="app-brand" aria-label="EpiTrack">
+              <span className="app-brand__epi">Epi</span>
+              <span className="app-brand__track">Track</span>
+            </h1>
           </div>
 
           <button
@@ -73,7 +72,7 @@ export function AppShell({ children, showFab }: AppShellProps) {
         ))}
       </nav>
 
-      {showFab ? <FloatingActionButton to="/add" label="Ajouter une crise" /> : null}
+      {showFab ? <FloatingActionButton to="/add" label="Nouvelle crise" /> : null}
     </div>
   );
 }

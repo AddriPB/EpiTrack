@@ -42,7 +42,7 @@ export function AddEventPage() {
         color,
         observation: observation.trim() || undefined
       });
-      window.sessionStorage.setItem("epitrack-flash", "Crise enregistrée.");
+      window.sessionStorage.setItem("epitrack-flash", "Enregistrée");
       navigate("/calendar");
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Enregistrement impossible.");
@@ -77,8 +77,7 @@ export function AddEventPage() {
     <section className="page-section page-section--narrow">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">Saisie rapide</p>
-          <h2>Ajouter une crise</h2>
+          <h2>Nouvelle crise</h2>
         </div>
       </div>
 
@@ -94,7 +93,7 @@ export function AddEventPage() {
         </label>
 
         <fieldset className="field fieldset">
-          <legend>Couleur</legend>
+          <legend>Gravité</legend>
           <div className="color-picker" role="radiogroup" aria-label="Choisir une couleur">
             {EVENT_COLORS.map((item) => (
               <label
@@ -131,7 +130,7 @@ export function AddEventPage() {
         {error ? <p className="form-error">{error}</p> : null}
 
         <button type="submit" className="primary-button" disabled={saving}>
-          {saving ? "Enregistrement…" : "Enregistrer"}
+          {saving ? "Enregistrement…" : "Valider"}
         </button>
       </form>
     </section>

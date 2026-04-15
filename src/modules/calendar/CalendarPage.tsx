@@ -27,13 +27,11 @@ export function CalendarPage() {
   const title = view === "month" ? getMonthLabel(year, monthIndex) : String(year);
   const previousStep = view === "month" ? -1 : -12;
   const nextStep = view === "month" ? 1 : 12;
-  const periodLabel = view === "month" ? "Période mensuelle" : "Période annuelle";
 
   return (
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <p className="eyebrow">{periodLabel}</p>
           <h2>{title}</h2>
         </div>
 
