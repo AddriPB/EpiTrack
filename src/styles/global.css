@@ -184,6 +184,14 @@ h3 {
   max-width: 36rem;
 }
 
+.entry-page {
+  max-width: 21rem;
+}
+
+.page-heading--entry {
+  gap: 0.2rem;
+}
+
 .page-heading {
   align-items: start;
 }
@@ -343,6 +351,14 @@ h3 {
   gap: var(--space-3);
 }
 
+.form-card--entry {
+  width: 100%;
+  max-width: 20rem;
+  justify-self: center;
+  gap: 0.7rem;
+  padding: 0.72rem;
+}
+
 .state-card p {
   color: var(--color-text-soft);
 }
@@ -452,6 +468,7 @@ h3 {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 0.34rem;
+  align-items: stretch;
 }
 
 .calendar-grid--labels {
@@ -468,7 +485,7 @@ h3 {
 }
 
 .calendar-day {
-  min-height: 4.6rem;
+  min-height: 3rem;
   padding: 0.48rem 0.3rem 0.35rem;
   border-radius: 0.95rem;
   background: var(--color-surface-muted);
@@ -505,11 +522,11 @@ h3 {
 }
 
 .calendar-day__dots {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-content: start;
   gap: 0.22rem;
-  min-height: 1.05rem;
+  min-height: 0.68rem;
 }
 
 .event-dot,
@@ -637,19 +654,21 @@ h3 {
 
 .field {
   display: grid;
-  gap: var(--space-2);
+  gap: 0.35rem;
+  width: 100%;
 }
 
 .field span,
 .fieldset legend {
   font-weight: 600;
+  font-size: 0.82rem;
 }
 
 .field input,
 .field textarea {
   width: 100%;
-  min-height: 3rem;
-  padding: 0.9rem 1rem;
+  min-height: 2.75rem;
+  padding: 0.72rem 0.85rem;
   border: 1px solid var(--color-border);
   background: rgba(15, 22, 32, 0.72);
   color: var(--color-text);
@@ -657,9 +676,9 @@ h3 {
 }
 
 .field textarea {
-  min-height: 7rem;
+  min-height: 4.6rem;
   resize: vertical;
-  line-height: 1.45;
+  line-height: 1.35;
 }
 
 .fieldset {
@@ -670,15 +689,18 @@ h3 {
 
 .color-picker {
   display: grid;
-  gap: 0.45rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem;
+  width: 100%;
 }
 
 .color-choice {
   display: flex;
   align-items: center;
-  gap: 0.65rem;
-  min-height: 2.75rem;
-  padding: 0.62rem 0.8rem;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 2.45rem;
+  padding: 0.5rem 0.45rem;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   background: rgba(15, 22, 32, 0.64);
@@ -692,6 +714,18 @@ h3 {
 
 .color-choice input {
   accent-color: var(--color-primary);
+}
+
+.color-choice__input--yellow {
+  accent-color: var(--color-accent-yellow);
+}
+
+.color-choice__input--orange {
+  accent-color: var(--color-accent-orange);
+}
+
+.color-choice__input--red {
+  accent-color: var(--color-accent-red);
 }
 
 .color-choice__dot {
@@ -715,6 +749,9 @@ h3 {
 
 .color-choice__label {
   font-weight: 600;
+  font-size: 0.78rem;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .color-choice__label--yellow {

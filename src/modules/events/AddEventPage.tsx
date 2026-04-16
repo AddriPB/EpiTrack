@@ -74,14 +74,14 @@ export function AddEventPage() {
   }
 
   return (
-    <section className="page-section page-section--narrow">
-      <div className="page-heading">
+    <section className="page-section page-section--narrow entry-page">
+      <div className="page-heading page-heading--entry">
         <div>
           <h2>Nouvelle crise</h2>
         </div>
       </div>
 
-      <form className="form-card" onSubmit={handleSubmit}>
+      <form className="form-card form-card--entry" onSubmit={handleSubmit}>
         <label className="field">
           <span>Date</span>
           <input
@@ -106,6 +106,7 @@ export function AddEventPage() {
                   value={item.value}
                   checked={color === item.value}
                   onChange={() => setColor(item.value)}
+                  className={`color-choice__input color-choice__input--${item.value}`}
                 />
                 <span
                   className={`color-choice__dot color-choice__dot--${item.value}`}
@@ -122,7 +123,7 @@ export function AddEventPage() {
         <label className="field">
           <span>Observation</span>
           <textarea
-            rows={4}
+            rows={2}
             value={observation}
             onChange={(event) => setObservation(event.target.value)}
             placeholder="Facultatif"

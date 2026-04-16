@@ -27,8 +27,6 @@ export function MonthCalendar({ year, monthIndex, events }: MonthCalendarProps) 
       <div className="calendar-grid" role="grid" aria-label={getMonthLabelShort(year, monthIndex)}>
         {days.map((day) => {
           const dayEvents = day.isCurrentMonth ? eventsByDay.get(day.day) ?? [] : [];
-          const visibleDots = dayEvents.slice(0, 4);
-          const overflow = Math.max(dayEvents.length - visibleDots.length, 0);
 
           return (
             <article
@@ -44,13 +42,12 @@ export function MonthCalendar({ year, monthIndex, events }: MonthCalendarProps) 
               <span className="calendar-day__number">{day.day}</span>
 
               <div className="calendar-day__dots" aria-hidden="true">
-                {visibleDots.map((event) => (
+                {dayEvents.map((event) => (
                   <span
                     key={event.id}
                     className={`event-dot event-dot--${event.color}`}
                   />
                 ))}
-                {overflow > 0 ? <span className="event-overflow">+{overflow}</span> : null}
               </div>
             </article>
           );
