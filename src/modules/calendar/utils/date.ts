@@ -13,7 +13,8 @@ const weekdayFormatter = new Intl.DateTimeFormat("fr-FR", {
 
 export function getMonthLabel(year: number, monthIndex: number) {
   const date = new Date(year, monthIndex, 1);
-  return monthFormatter.format(date);
+  const label = monthFormatter.format(date);
+  return label.charAt(0).toUpperCase() + label.slice(1);
 }
 
 export function getMonthLabelShort(year: number, monthIndex: number) {
