@@ -9,11 +9,7 @@ export function YearSummaryGrid({ year, months }: YearSummaryGridProps) {
   return (
     <section className="year-summary" aria-label={`Synthèse annuelle ${year}`}>
       <div className="year-summary__header">
-        <div>
-          <p className="section-label">Lecture annuelle</p>
-          <h3>{year}</h3>
-        </div>
-        <span className="year-summary__meta">12 mois</span>
+        <h3>{year}</h3>
       </div>
 
       <div className="year-grid">

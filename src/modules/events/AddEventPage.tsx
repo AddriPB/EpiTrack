@@ -111,7 +111,9 @@ export function AddEventPage() {
                   className={`color-choice__dot color-choice__dot--${item.value}`}
                   aria-hidden="true"
                 />
-                <span>{item.label}</span>
+                <span className={`color-choice__label color-choice__label--${item.value}`}>
+                  {item.label}
+                </span>
               </label>
             ))}
           </div>

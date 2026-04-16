@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "./AppShell";
 import { AddEventPage } from "../modules/events/AddEventPage";
 import { CalendarPage } from "../modules/calendar/CalendarPage";
+import { GraphsPage } from "../modules/graphs/GraphsPage";
 import { AuthPage } from "../modules/auth/AuthPage";
 import { LoadingState } from "../shared/components/LoadingState";
 import { useAuth } from "../services/auth/AuthContext";
@@ -44,6 +45,7 @@ export function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/calendar" replace />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/graphs" element={<GraphsPage />} />
         <Route path="/add" element={<AddEventPage />} />
         <Route path="*" element={<Navigate to="/calendar" replace />} />
       </Routes>

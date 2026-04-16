@@ -8,7 +8,8 @@ type AppShellProps = PropsWithChildren<{
 }>;
 
 const navItems = [
-  { to: "/calendar", label: "Calendrier" }
+  { to: "/calendar", label: "Calendrier" },
+  { to: "/graphs", label: "Graphiques" }
 ];
 
 export function AppShell({ children, showFab }: AppShellProps) {

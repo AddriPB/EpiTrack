@@ -71,7 +71,10 @@ export function AuthPage() {
   return (
     <section className="page-section page-section--narrow auth-page">
       <div className="auth-hero">
-        <h1>EpiTrack</h1>
+        <h1 className="app-brand auth-brand" aria-label="EpiTrack">
+          <span className="app-brand__epi">Epi</span>
+          <span className="app-brand__track">Track</span>
+        </h1>
         <p className="auth-hero__text">Connexion rapide à votre espace.</p>
       </div>
 

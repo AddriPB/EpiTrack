@@ -190,14 +190,31 @@ h3 {
 
 .auth-page {
   min-height: calc(100vh - 6.5rem);
-  align-content: start;
+  align-content: center;
   padding-top: 0;
+  justify-items: center;
 }
 
 .auth-hero__text {
   color: var(--color-text-soft);
   font-size: 0.88rem;
   line-height: 1.35;
+  text-align: center;
+}
+
+.auth-hero,
+.auth-card {
+  width: 100%;
+  max-width: 21rem;
+}
+
+.auth-hero {
+  justify-items: center;
+  text-align: center;
+}
+
+.auth-brand {
+  font-size: clamp(1.9rem, 7vw, 2.4rem);
 }
 
 .segmented-control {
@@ -273,6 +290,7 @@ h3 {
 .state-card,
 .stat-card,
 .calendar-card,
+.chart-card,
 .form-card,
 .year-summary,
 .period-switcher--compact {
@@ -285,6 +303,7 @@ h3 {
 .loading-state,
 .state-card,
 .calendar-card,
+.chart-card,
 .form-card,
 .year-summary,
 .period-switcher--compact {
@@ -529,6 +548,53 @@ h3 {
   gap: var(--space-3);
 }
 
+.chart-card {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.chart {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.chart__svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.chart__baseline {
+  fill: none;
+  stroke: rgba(129, 144, 160, 0.32);
+  stroke-width: 1;
+}
+
+.chart__line {
+  fill: none;
+  stroke: #8fb4d9;
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart__dot {
+  fill: var(--color-accent-orange);
+}
+
+.chart__labels {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.2rem;
+}
+
+.chart__label {
+  color: var(--color-text-muted);
+  font-size: 0.7rem;
+  line-height: 1;
+  white-space: nowrap;
+}
+
 .year-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem;
@@ -633,6 +699,34 @@ h3 {
   height: 0.68rem;
   background: var(--color-text);
   border-color: rgba(237, 243, 251, 0.2);
+}
+
+.color-choice__dot--yellow {
+  background: var(--color-accent-yellow);
+}
+
+.color-choice__dot--orange {
+  background: var(--color-accent-orange);
+}
+
+.color-choice__dot--red {
+  background: var(--color-accent-red);
+}
+
+.color-choice__label {
+  font-weight: 600;
+}
+
+.color-choice__label--yellow {
+  color: var(--color-accent-yellow);
+}
+
+.color-choice__label--orange {
+  color: var(--color-accent-orange);
+}
+
+.color-choice__label--red {
+  color: var(--color-accent-red);
 }
 
 .form-error {

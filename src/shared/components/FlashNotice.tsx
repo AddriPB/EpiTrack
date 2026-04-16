@@ -12,6 +12,14 @@ export function FlashNotice() {
 
     setMessage(flash);
     window.sessionStorage.removeItem("epitrack-flash");
+
+    const timeoutId = window.setTimeout(() => {
+      setMessage(null);
+    }, 2000);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
   }, []);
 
   if (!message) {
