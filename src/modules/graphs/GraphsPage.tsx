@@ -1,15 +1,28 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { ErrorState } from "../../shared/components/ErrorState";
 import { FlashNotice } from "../../shared/components/FlashNotice";
-import { useEpilepsyEvents } from "../calendar/hooks/useEpilepsyEvents";
-import { buildYearSummary, getMonthLabel, shiftMonth } from "../calendar/utils/date";
-import { getYearlySummary } from "../calendar/utils/aggregations";
+import { EpilepsyEvent } from "../../shared/types/event";
+import { getMonthLabelShort } from "../calendar/utils/date";
+import { useEpilepsyEventsYears } from "./hooks/useEpilepsyEventsYears";
 
-type GraphView = "month" | "year";
 type Point = {
   label: string;
   value: number;
+};
+
+type RollingWindow = {
+  label: string;
+  monthSpan: number;
+  start: Date;
+  end: Date;
+};
+
+type TrendSummary = {
+  current: number;
+  previous: number;
+  change: number;
+  direction: "up" | "down" | "flat";
 };
 
 const CHART_WIDTH = 320;
@@ -18,38 +31,25 @@ const CHART_PADDING_X = 18;
 const CHART_PADDING_Y = 18;
 
 export function GraphsPage() {
-  const [view, setView] = useState<GraphView>("month");
-  const [currentPeriod, setCurrentPeriod] = useState(() => buildYearSummary(new Date()));
-  const { year, monthIndex } = currentPeriod;
-  const { events, loading, error, firebaseReady } = useEpilepsyEvents(year);
+  const today = useMemo(() => startOfDay(new Date()), []);
+  const rollingMonth = useMemo(() => buildRollingWindow(today, 1, "1 mois glissant"), [today]);
+  const rollingYear = useMemo(() => buildRollingWindow(today, 12, "12 mois glissants"), [today]);
+  const requiredYears = useMemo(
+    () => getRequiredYears(today, rollingMonth, rollingYear),
+    [today, rollingMonth, rollingYear]
+  );
+  const { events, loading, error, firebaseReady } = useEpilepsyEventsYears(requiredYears);
 
-  const monthPoints = useMemo(() => buildMonthPoints(events, year, monthIndex), [events, year, monthIndex]);
-  const yearPoints = useMemo(() => buildYearPoints(events, year), [events, year]);
-  const chartPoints = view === "month" ? monthPoints : yearPoints;
-  const title = view === "month" ? getMonthLabel(year, monthIndex) : String(year);
+  const monthTrend = useMemo(() => buildTrendSummary(events, rollingMonth), [events, rollingMonth]);
+  const yearTrend = useMemo(() => buildTrendSummary(events, rollingYear), [events, rollingYear]);
+  const chartPoints = useMemo(() => buildLastTwelveMonthsPoints(events, today), [events, today]);
 
   return (
     <section className="page-section">
       <div className="page-heading">
         <div>
-          <h2>Graphiques</h2>
-        </div>
-
-        <div className="segmented-control" role="tablist" aria-label="Choisir une vue">
-          <button
-            type="button"
-            className={view === "month" ? "is-active" : ""}
-            onClick={() => setView("month")}
-          >
-            Mois
-          </button>
-          <button
-            type="button"
-            className={view === "year" ? "is-active" : ""}
-            onClick={() => setView("year")}
-          >
-            Année
-          </button>
+          <h2>Statistiques</h2>
+          <p className="page-heading__hint">Vue glissante calculée à partir du jour courant.</p>
         </div>
       </div>
 
@@ -62,44 +62,27 @@ export function GraphsPage() {
         />
       ) : null}
 
-      {firebaseReady && loading ? <LoadingState label="Chargement des données…" /> : null}
+      {firebaseReady && loading ? <LoadingState label="Chargement des statistiques…" /> : null}
       {firebaseReady && error ? (
         <ErrorState title="Impossible de charger les données" description={error} />
       ) : null}
 
       {firebaseReady && !loading && !error ? (
         <>
-          <div className="period-switcher period-switcher--compact" aria-label="Changer de période">
-            <button
-              type="button"
-              className="ghost-button ghost-button--nav"
-              onClick={() =>
-                setCurrentPeriod((value) =>
-                  shiftMonth(value.year, value.monthIndex, view === "month" ? -1 : -12)
-                )
-              }
-              aria-label={view === "month" ? "Afficher le mois précédent" : "Afficher l’année précédente"}
-            >
-              <span aria-hidden="true">←</span>
-            </button>
-            <div className="period-switcher__current">
-              <strong>{title}</strong>
-            </div>
-            <button
-              type="button"
-              className="ghost-button ghost-button--nav"
-              onClick={() =>
-                setCurrentPeriod((value) =>
-                  shiftMonth(value.year, value.monthIndex, view === "month" ? 1 : 12)
-                )
-              }
-              aria-label={view === "month" ? "Afficher le mois suivant" : "Afficher l’année suivante"}
-            >
-              <span aria-hidden="true">→</span>
-            </button>
+          <div className="stats-overview" aria-label="Synthèse des statistiques">
+            <StatsTrendCard summary={monthTrend} window={rollingMonth} />
+            <StatsTrendCard summary={yearTrend} window={rollingYear} />
           </div>
 
-          <div className="chart-card">
+          <div className="chart-card chart-card--stats">
+            <div className="chart-card__header">
+              <div>
+                <p className="section-label">Graphique</p>
+                <h3>Répartition sur 12 mois</h3>
+              </div>
+              <span className="chart-card__meta">Mois calendaires</span>
+            </div>
+
             <LineChart points={chartPoints} />
           </div>
         </>
@@ -108,25 +91,170 @@ export function GraphsPage() {
   );
 }
 
-function buildMonthPoints(events: Array<{ dateKey: string; month: number; year: number; day: number }>, year: number, monthIndex: number): Point[] {
-  const month = monthIndex + 1;
-  const daysInMonth = new Date(year, month, 0).getDate();
-  const dayTotals = Array.from({ length: daysInMonth }, (_, index) => {
-    const day = index + 1;
-    return events.filter((event) => event.year === year && event.month === month && event.day === day).length;
-  });
+function StatsTrendCard({
+  summary,
+  window
+}: {
+  summary: TrendSummary;
+  window: RollingWindow;
+}) {
+  return (
+    <article className="stats-card">
+      <p className="section-label">{window.label}</p>
+      <div className="stats-card__row">
+        <div>
+          <span className="stats-card__label">Total crises</span>
+          <strong className="stats-card__value">{summary.current}</strong>
+        </div>
 
-  return dayTotals.map((value, index) => ({
-    label: String(index + 1),
-    value
-  }));
+        <div
+          className={`stats-card__trend stats-card__trend--${summary.direction}`}
+          aria-label={`Variation ${formatSignedPercent(summary.change)}`}
+        >
+          <span className="stats-card__trend-sign">{formatSignedPercent(summary.change)}</span>
+          <span className="stats-card__trend-label">vs période précédente</span>
+        </div>
+      </div>
+
+      <p className="stats-card__range">{formatDateRange(window.start, window.end)}</p>
+      <p className="stats-card__comparison">Période précédente : {summary.previous} crise(s)</p>
+    </article>
+  );
 }
 
-function buildYearPoints(events: Array<{ year: number; monthKey: string }>, year: number): Point[] {
-  return getYearlySummary(events as never[], year).months.map((month) => ({
-    label: month.label.replace(".", ""),
-    value: month.total
-  }));
+function buildTrendSummary(events: EpilepsyEvent[], currentWindow: RollingWindow): TrendSummary {
+  const current = countEventsInRange(events, currentWindow.start, currentWindow.end);
+  const previousWindow = buildPreviousWindow(currentWindow);
+  const previous = countEventsInRange(events, previousWindow.start, previousWindow.end);
+  const change = calculatePercentChange(current, previous);
+
+  return {
+    current,
+    previous,
+    change,
+    direction: getTrendDirection(change)
+  };
+}
+
+function buildLastTwelveMonthsPoints(events: EpilepsyEvent[], today: Date): Point[] {
+  return Array.from({ length: 12 }, (_, index) => {
+    const monthDate = shiftMonthClamped(today, index - 11);
+    const year = monthDate.getFullYear();
+    const month = monthDate.getMonth() + 1;
+    const monthKey = `${year}-${String(month).padStart(2, "0")}`;
+
+    return {
+      label: getMonthLabelShort(year, monthDate.getMonth()).replace(".", ""),
+      value: events.filter((event) => event.monthKey === monthKey).length
+    };
+  });
+}
+
+function buildRollingWindow(end: Date, monthSpan: number, label: string): RollingWindow {
+  const start = shiftMonthClamped(end, -monthSpan);
+
+  return {
+    label,
+    monthSpan,
+    start,
+    end
+  };
+}
+
+function buildPreviousWindow(window: RollingWindow): RollingWindow {
+  const end = addDays(window.start, -1);
+  const start = shiftMonthClamped(end, -window.monthSpan);
+
+  return {
+    label: "Période précédente",
+    monthSpan: window.monthSpan,
+    start,
+    end
+  };
+}
+
+function getRequiredYears(today: Date, rollingMonth: RollingWindow, rollingYear: RollingWindow) {
+  return Array.from(
+    new Set([
+      today.getFullYear(),
+      rollingMonth.start.getFullYear(),
+      rollingYear.start.getFullYear(),
+      buildPreviousWindow(rollingYear).start.getFullYear()
+    ])
+  ).sort((left, right) => left - right);
+}
+
+function countEventsInRange(events: EpilepsyEvent[], start: Date, end: Date) {
+  const startKey = toDateKey(start);
+  const endKey = toDateKey(end);
+
+  return events.filter((event) => event.dateKey >= startKey && event.dateKey <= endKey).length;
+}
+
+function calculatePercentChange(current: number, previous: number) {
+  if (previous === 0) {
+    return current === 0 ? 0 : 100;
+  }
+
+  return Math.round(((current - previous) / previous) * 100);
+}
+
+function getTrendDirection(change: number): "up" | "down" | "flat" {
+  if (change > 0) {
+    return "up";
+  }
+
+  if (change < 0) {
+    return "down";
+  }
+
+  return "flat";
+}
+
+function formatSignedPercent(value: number) {
+  if (value === 0) {
+    return "0%";
+  }
+
+  return `${value > 0 ? "+" : ""}${value}%`;
+}
+
+function formatDateRange(start: Date, end: Date) {
+  return `${formatLocalDate(start)} au ${formatLocalDate(end)}`;
+}
+
+function formatLocalDate(date: Date) {
+  return new Intl.DateTimeFormat("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric"
+  }).format(date);
+}
+
+function toDateKey(date: Date) {
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, "0"),
+    String(date.getDate()).padStart(2, "0")
+  ].join("-");
+}
+
+function startOfDay(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+function addDays(date: Date, days: number) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+}
+
+function shiftMonthClamped(date: Date, delta: number) {
+  const targetMonthIndex = date.getMonth() + delta;
+  const targetYear = date.getFullYear() + Math.floor(targetMonthIndex / 12);
+  const normalizedMonth = ((targetMonthIndex % 12) + 12) % 12;
+  const maxDay = new Date(targetYear, normalizedMonth + 1, 0).getDate();
+  const targetDay = Math.min(date.getDate(), maxDay);
+
+  return new Date(targetYear, normalizedMonth, targetDay);
 }
 
 function LineChart({ points }: { points: Point[] }) {
@@ -141,12 +269,18 @@ function LineChart({ points }: { points: Point[] }) {
     })
     .join(" ");
 
-  const tickIndexes = points.length > 12 ? [0, 5, 10, 15, 20, 25, 30].filter((index) => index < points.length) : points.map((_, index) => index);
-
   return (
     <div className="chart">
-      <svg viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`} className="chart__svg" role="img" aria-label="Graphique des crises">
-        <path className="chart__baseline" d={`M ${CHART_PADDING_X} ${CHART_HEIGHT - CHART_PADDING_Y} H ${CHART_WIDTH - CHART_PADDING_X}`} />
+      <svg
+        viewBox={`0 0 ${CHART_WIDTH} ${CHART_HEIGHT}`}
+        className="chart__svg"
+        role="img"
+        aria-label="Graphique des crises sur les douze derniers mois"
+      >
+        <path
+          className="chart__baseline"
+          d={`M ${CHART_PADDING_X} ${CHART_HEIGHT - CHART_PADDING_Y} H ${CHART_WIDTH - CHART_PADDING_X}`}
+        />
         <path className="chart__line" d={linePath} />
         {points.map((point, index) => {
           const x = CHART_PADDING_X + stepX * index;
@@ -156,9 +290,9 @@ function LineChart({ points }: { points: Point[] }) {
       </svg>
 
       <div className="chart__labels">
-        {tickIndexes.map((index) => (
-          <span key={`${points[index].label}-${index}`} className="chart__label">
-            {points[index].label}
+        {points.map((point, index) => (
+          <span key={`${point.label}-${index}`} className="chart__label">
+            {point.label}
           </span>
         ))}
       </div>

@@ -47,3 +47,35 @@ export function subscribeToYearEvents(
     }
   );
 }
+
+export function subscribeToYearsEvents(
+  uid: string,
+  years: number[],
+  onSuccess: (events: EpilepsyEvent[]) => void,
+  onError: (message: string) => void
+) {
+  const uniqueYears = Array.from(new Set(years)).sort((left, right) => left - right);
+
+  if (uniqueYears.length === 0) {
+    onSuccess([]);
+    return () => undefined;
+  }
+
+  const collectionRef = getUserEventsCollection(uid);
+  const yearFilter = uniqueYears.length === 1
+    ? where("year", "==", uniqueYears[0])
+    : where("year", "in", uniqueYears);
+  const eventsQuery = query(collectionRef, yearFilter);
+
+  return onSnapshot(
+    eventsQuery,
+    (snapshot) => {
+      const items = snapshot.docs.map((document) => toUiEvent(document.id, document.data()));
+      items.sort((left, right) => left.dateKey.localeCompare(right.dateKey));
+      onSuccess(items);
+    },
+    (error) => {
+      onError(error.message);
+    }
+  );
+}

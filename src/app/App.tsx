@@ -45,7 +45,8 @@ export function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/calendar" replace />} />
         <Route path="/calendar" element={<CalendarPage />} />
-        <Route path="/graphs" element={<GraphsPage />} />
+        <Route path="/stats" element={<GraphsPage />} />
+        <Route path="/graphs" element={<Navigate to="/stats" replace />} />
         <Route path="/add" element={<AddEventPage />} />
         <Route path="*" element={<Navigate to="/calendar" replace />} />
       </Routes>
