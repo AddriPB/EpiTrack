@@ -84,7 +84,6 @@ export function CalendarPage() {
               <span aria-hidden="true">←</span>
             </button>
             <div className="period-switcher__current">
-              <span className="period-switcher__label">{view === "month" ? "Mois affiché" : "Année affichée"}</span>
               <strong>{title}</strong>
             </div>
             <button
