@@ -229,6 +229,7 @@ export function CalendarPage() {
                 : `Supprimer les crises du ${activeDay.label}`
           }
           onClose={closeModal}
+          showCloseButton={false}
         >
           {modalMode === "actions" ? (
             <div className="modal-stack">

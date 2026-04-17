@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { AppShell } from "./AppShell";
 import { AddEventPage } from "../modules/events/AddEventPage";
@@ -15,6 +16,10 @@ export function App() {
   const showFab = isAuthenticated && location.pathname !== "/add";
   const fabTo = location.pathname === "/treatment" ? "/treatment?action=create" : "/add";
   const fabLabel = location.pathname === "/treatment" ? "Ajouter un traitement" : "Nouvelle crise";
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+  }, [location.pathname]);
 
   if (loading) {
     return (

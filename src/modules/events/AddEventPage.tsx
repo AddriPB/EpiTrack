@@ -52,6 +52,10 @@ export function AddEventPage() {
     }
   }
 
+  function handleCancel() {
+    navigate("/calendar");
+  }
+
   if (!firebaseReady) {
     return (
       <section className="page-section">
@@ -129,9 +133,19 @@ export function AddEventPage() {
 
         {error ? <p className="form-error">{error}</p> : null}
 
-        <button type="submit" className="primary-button primary-button--compact" disabled={saving}>
-          {saving ? "Enregistrement…" : "Enregistrer"}
-        </button>
+        <div className="modal-actions">
+          <button
+            type="button"
+            className="ghost-button ghost-button--compact"
+            onClick={handleCancel}
+            disabled={saving}
+          >
+            Annuler
+          </button>
+          <button type="submit" className="primary-button primary-button--compact" disabled={saving}>
+            {saving ? "Enregistrement…" : "Enregistrer"}
+          </button>
+        </div>
       </form>
     </section>
   );
