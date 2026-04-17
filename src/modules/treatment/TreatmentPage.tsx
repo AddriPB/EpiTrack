@@ -1,4 +1,5 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { EmptyState } from "../../shared/components/EmptyState";
 import { ErrorState } from "../../shared/components/ErrorState";
 import { LoadingState } from "../../shared/components/LoadingState";
@@ -27,6 +28,8 @@ const EMPTY_DRAFT: TreatmentInput = {
 
 export function TreatmentPage() {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const firebaseReady = isFirebaseConfigured();
   const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [loading, setLoading] = useState(firebaseReady && Boolean(user));
@@ -80,6 +83,17 @@ export function TreatmentPage() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    if (params.get("action") !== "create") {
+      return;
+    }
+
+    openCreateModal();
+    navigate("/treatment", { replace: true });
+  }, [location.search, navigate]);
 
   function showConfirmation(id: string) {
     setConfirmedTreatmentId(id);
@@ -210,10 +224,6 @@ export function TreatmentPage() {
         <div>
           <h2>Traitement</h2>
         </div>
-
-        <button type="button" className="primary-button primary-button--compact" onClick={openCreateModal}>
-          Ajouter
-        </button>
       </div>
 
       {loading ? <LoadingState label="Chargement…" /> : null}

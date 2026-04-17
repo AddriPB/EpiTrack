@@ -573,6 +573,12 @@ h3 {
   display: grid;
   gap: 0.35rem;
   min-width: 3.6rem;
+  padding: 0.2rem;
+  border-radius: var(--radius-md);
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .stats-card__controls {
@@ -597,8 +603,27 @@ h3 {
   border-radius: var(--radius-md);
   background: rgba(15, 22, 32, 0.72);
   color: var(--color-text);
-  font-size: 0.95rem;
+  font-size: 16px;
   text-align: center;
+}
+
+.stats-card__control--active {
+  background: rgba(34, 48, 67, 0.58);
+  box-shadow: inset 0 0 0 1px rgba(216, 228, 244, 0.08);
+}
+
+.stats-card__control--active span {
+  color: var(--color-text);
+}
+
+.stats-card__control--active input {
+  border-color: rgba(216, 228, 244, 0.28);
+  background: rgba(15, 22, 32, 0.92);
+}
+
+.stats-card__period-value {
+  color: var(--color-text);
+  font-weight: 700;
 }
 
 .calendar-card__header,

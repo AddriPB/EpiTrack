@@ -174,7 +174,12 @@ function StatsAverageCard({
         </div>
 
         <div className="stats-card__controls">
-          <label className="stats-card__control" htmlFor="average-years">
+          <label
+            className={`stats-card__control${
+              period.unit === "years" ? " stats-card__control--active" : ""
+            }`}
+            htmlFor="average-years"
+          >
             <span>Années</span>
             <input
               id="average-years"
@@ -187,7 +192,12 @@ function StatsAverageCard({
             />
           </label>
 
-          <label className="stats-card__control" htmlFor="average-months">
+          <label
+            className={`stats-card__control${
+              period.unit === "months" ? " stats-card__control--active" : ""
+            }`}
+            htmlFor="average-months"
+          >
             <span>Mois</span>
             <input
               id="average-months"
@@ -203,7 +213,11 @@ function StatsAverageCard({
       </div>
 
       <p className="stats-card__range">{average.total} crise(s) sur {average.months} mois glissants</p>
-      <p className="stats-card__comparison">Fenêtre choisie : {formatAveragePeriodLabel(period)}</p>
+      <p className="stats-card__comparison">
+        Fenêtre choisie :
+        {" "}
+        <strong className="stats-card__period-value">{formatAveragePeriodLabel(period)}</strong>
+      </p>
     </article>
   );
 }

@@ -13,6 +13,8 @@ export function App() {
   const { user, loading, firebaseReady } = useAuth();
   const isAuthenticated = Boolean(user);
   const showFab = isAuthenticated && location.pathname !== "/add";
+  const fabTo = location.pathname === "/treatment" ? "/treatment?action=create" : "/add";
+  const fabLabel = location.pathname === "/treatment" ? "Ajouter un traitement" : "Nouvelle crise";
 
   if (loading) {
     return (
@@ -42,7 +44,7 @@ export function App() {
   }
 
   return (
-    <AppShell showFab={showFab}>
+    <AppShell showFab={showFab} fabTo={fabTo} fabLabel={fabLabel}>
       <Routes>
         <Route path="/" element={<Navigate to="/calendar" replace />} />
         <Route path="/calendar" element={<CalendarPage />} />

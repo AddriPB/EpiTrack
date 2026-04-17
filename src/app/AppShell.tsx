@@ -5,6 +5,8 @@ import { useAuth } from "../services/auth/AuthContext";
 
 type AppShellProps = PropsWithChildren<{
   showFab: boolean;
+  fabTo: string;
+  fabLabel: string;
 }>;
 
 const navItems = [
@@ -13,7 +15,7 @@ const navItems = [
   { to: "/stats", label: "Statistiques", icon: StatsIcon }
 ];
 
-export function AppShell({ children, showFab }: AppShellProps) {
+export function AppShell({ children, showFab, fabTo, fabLabel }: AppShellProps) {
   const { signOutUser } = useAuth();
 
   return (
@@ -83,7 +85,7 @@ export function AppShell({ children, showFab }: AppShellProps) {
         </div>
       </nav>
 
-      {showFab ? <FloatingActionButton to="/add" label="Nouvelle crise" /> : null}
+      {showFab ? <FloatingActionButton to={fabTo} label={fabLabel} /> : null}
     </div>
   );
 }
@@ -130,7 +132,7 @@ function TreatmentIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path
-        d="M6 10.25c0-2.35 1.9-4.25 4.25-4.25h3.5c2.35 0 4.25 1.9 4.25 4.25s-1.9 4.25-4.25 4.25h-3.5C7.9 14.5 6 12.6 6 10.25Z"
+        d="M7.25 8.25c0-1.8 1.45-3.25 3.25-3.25h1.25c1.8 0 3.25 1.45 3.25 3.25s-1.45 3.25-3.25 3.25H10.5c-1.8 0-3.25-1.45-3.25-3.25Z"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
@@ -138,7 +140,23 @@ function TreatmentIcon() {
         strokeWidth="1.9"
       />
       <path
-        d="M12 6v8.5"
+        d="M11.25 5v6.5"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.9"
+      />
+      <path
+        d="M9.25 14.25c0-1.52 1.23-2.75 2.75-2.75h2.75c1.52 0 2.75 1.23 2.75 2.75S16.27 17 14.75 17H12c-1.52 0-2.75-1.23-2.75-2.75Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.9"
+      />
+      <path
+        d="M13.75 11.5V17"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
