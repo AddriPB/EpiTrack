@@ -99,10 +99,9 @@ export function GraphsPage() {
 
   return (
     <section className="page-section">
-      <div className="page-heading">
+      <div className="page-heading page-heading--compact">
         <div>
           <h2>Statistiques</h2>
-          <p className="page-heading__hint">Vue glissante calculée à partir du jour courant.</p>
         </div>
       </div>
 
@@ -138,10 +137,8 @@ export function GraphsPage() {
           <div className="chart-card chart-card--stats">
             <div className="chart-card__header">
               <div>
-                <p className="section-label">Graphique</p>
                 <h3>Répartition sur 12 mois</h3>
               </div>
-              <span className="chart-card__meta">Mois calendaires</span>
             </div>
 
             <LineChart points={chartPoints} />

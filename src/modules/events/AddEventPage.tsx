@@ -128,7 +128,7 @@ export function AddEventPage() {
 
         {error ? <p className="form-error">{error}</p> : null}
 
-        <button type="submit" className="primary-button" disabled={saving}>
+        <button type="submit" className="primary-button primary-button--compact" disabled={saving}>
           {saving ? "Enregistrement…" : "Valider"}
         </button>
       </form>

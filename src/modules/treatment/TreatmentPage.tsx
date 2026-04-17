@@ -1,42 +1,46 @@
-import { FormEvent, TouchEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { EmptyState } from "../../shared/components/EmptyState";
 import { ErrorState } from "../../shared/components/ErrorState";
 import { LoadingState } from "../../shared/components/LoadingState";
-import { EmptyState } from "../../shared/components/EmptyState";
-import { isFirebaseConfigured } from "../../services/firebase/config";
+import { Modal } from "../../shared/components/Modal";
 import { useAuth } from "../../services/auth/AuthContext";
+import { isFirebaseConfigured } from "../../services/firebase/config";
 import {
   createTreatment,
   deleteTreatment,
   subscribeToTreatments,
   updateTreatment
 } from "../../services/treatments/treatmentService";
-import { Treatment } from "../../shared/types/treatment";
+import { Treatment, TreatmentInput } from "../../shared/types/treatment";
 
-type TreatmentDraft = {
-  id: string;
-  name: string;
-  morningDose: string;
-  eveningDose: string;
-  isNew?: boolean;
+type ModalState =
+  | { mode: "create"; draft: TreatmentInput }
+  | { mode: "edit"; treatmentId: string; draft: TreatmentInput }
+  | { mode: "delete"; treatment: Treatment }
+  | null;
+
+const EMPTY_DRAFT: TreatmentInput = {
+  name: "",
+  morningDose: "",
+  eveningDose: ""
 };
-
-const SWIPE_DELETE_THRESHOLD = 84;
 
 export function TreatmentPage() {
   const { user } = useAuth();
   const firebaseReady = isFirebaseConfigured();
-  const [drafts, setDrafts] = useState<TreatmentDraft[]>([]);
+  const [treatments, setTreatments] = useState<Treatment[]>([]);
   const [loading, setLoading] = useState(firebaseReady && Boolean(user));
   const [error, setError] = useState<string | null>(null);
-  const swipeStartRef = useRef<Record<string, number>>({});
+  const [modalState, setModalState] = useState<ModalState>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [confirmedTreatmentId, setConfirmedTreatmentId] = useState<string | null>(null);
+  const confirmationTimeoutRef = useRef<number | null>(null);
   const knownTreatmentIdsRef = useRef<string[]>([]);
   const pendingCreateRef = useRef(false);
-  const confirmationTimeoutRef = useRef<number | null>(null);
-  const [confirmedTreatmentId, setConfirmedTreatmentId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!firebaseReady || !user) {
-      setDrafts([]);
+      setTreatments([]);
       setLoading(false);
       return;
     }
@@ -50,7 +54,7 @@ export function TreatmentPage() {
         const nextIds = items.map((item) => item.id);
         const addedIds = nextIds.filter((id) => !knownTreatmentIdsRef.current.includes(id));
 
-        setDrafts((currentDrafts) => mergeDrafts(currentDrafts, items));
+        setTreatments(items);
         knownTreatmentIdsRef.current = nextIds;
 
         if (pendingCreateRef.current && addedIds.length > 0) {
@@ -77,93 +81,6 @@ export function TreatmentPage() {
     };
   }, []);
 
-  function updateDraft(id: string, key: keyof TreatmentDraft, value: string) {
-    setDrafts((currentDrafts) =>
-      currentDrafts.map((draft) => (draft.id === id ? { ...draft, [key]: value } : draft))
-    );
-  }
-
-  function addLine() {
-    setDrafts((currentDrafts) => [
-      ...currentDrafts,
-      {
-        id: `new-${crypto.randomUUID()}`,
-        name: "",
-        morningDose: "",
-        eveningDose: "",
-        isNew: true
-      }
-    ]);
-  }
-
-  async function saveLine(event: FormEvent<HTMLFormElement>, draft: TreatmentDraft) {
-    event.preventDefault();
-
-    if (!user) {
-      setError("Connexion requise.");
-      return;
-    }
-
-    if (!draft.name.trim()) {
-      setError("Le nom du médicament est requis.");
-      return;
-    }
-
-    setError(null);
-
-    try {
-      const payload = {
-        name: draft.name,
-        morningDose: draft.morningDose,
-        eveningDose: draft.eveningDose
-      };
-
-      if (draft.isNew) {
-        pendingCreateRef.current = true;
-        await createTreatment(user.uid, payload);
-        setDrafts((currentDrafts) => currentDrafts.filter((entry) => entry.id !== draft.id));
-      } else {
-        await updateTreatment(user.uid, draft.id, payload);
-      }
-    } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : "Enregistrement impossible.");
-    }
-  }
-
-  async function removeLine(draft: TreatmentDraft) {
-    if (draft.isNew) {
-      setDrafts((currentDrafts) => currentDrafts.filter((entry) => entry.id !== draft.id));
-      return;
-    }
-
-    if (!user) {
-      setError("Connexion requise.");
-      return;
-    }
-
-    try {
-      await deleteTreatment(user.uid, draft.id);
-      setError(null);
-    } catch (submissionError) {
-      setError(submissionError instanceof Error ? submissionError.message : "Suppression impossible.");
-    }
-  }
-
-  function handleTouchStart(event: TouchEvent<HTMLElement>, id: string) {
-    swipeStartRef.current[id] = event.changedTouches[0]?.clientX ?? 0;
-  }
-
-  function handleTouchEnd(event: TouchEvent<HTMLElement>, draft: TreatmentDraft) {
-    const startX = swipeStartRef.current[draft.id];
-    const endX = event.changedTouches[0]?.clientX ?? startX;
-
-    if (startX - endX > SWIPE_DELETE_THRESHOLD) {
-      void removeLine(draft);
-    }
-
-    delete swipeStartRef.current[draft.id];
-  }
-
   function showConfirmation(id: string) {
     setConfirmedTreatmentId(id);
 
@@ -177,13 +94,104 @@ export function TreatmentPage() {
     }, 1400);
   }
 
+  function openCreateModal() {
+    setError(null);
+    setModalState({ mode: "create", draft: { ...EMPTY_DRAFT } });
+  }
+
+  function openEditModal(treatment: Treatment) {
+    setError(null);
+    setModalState({
+      mode: "edit",
+      treatmentId: treatment.id,
+      draft: {
+        name: treatment.name,
+        morningDose: treatment.morningDose,
+        eveningDose: treatment.eveningDose
+      }
+    });
+  }
+
+  function openDeleteModal(treatment: Treatment) {
+    setError(null);
+    setModalState({ mode: "delete", treatment });
+  }
+
+  function closeModal() {
+    setModalState(null);
+    setSubmitting(false);
+  }
+
+  function updateDraft(key: keyof TreatmentInput, value: string) {
+    setModalState((current) => {
+      if (!current || current.mode === "delete") {
+        return current;
+      }
+
+      return {
+        ...current,
+        draft: {
+          ...current.draft,
+          [key]: value
+        }
+      };
+    });
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!user || !modalState || modalState.mode === "delete") {
+      setError("Connexion requise.");
+      return;
+    }
+
+    if (!modalState.draft.name.trim()) {
+      setError("Le nom du médicament est requis.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      if (modalState.mode === "create") {
+        pendingCreateRef.current = true;
+        await createTreatment(user.uid, modalState.draft);
+      } else {
+        await updateTreatment(user.uid, modalState.treatmentId, modalState.draft);
+        showConfirmation(modalState.treatmentId);
+      }
+
+      closeModal();
+    } catch (submissionError) {
+      setError(submissionError instanceof Error ? submissionError.message : "Enregistrement impossible.");
+      setSubmitting(false);
+    }
+  }
+
+  async function handleDelete() {
+    if (!user || !modalState || modalState.mode !== "delete") {
+      setError("Connexion requise.");
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+
+    try {
+      await deleteTreatment(user.uid, modalState.treatment.id);
+      closeModal();
+    } catch (submissionError) {
+      setError(submissionError instanceof Error ? submissionError.message : "Suppression impossible.");
+      setSubmitting(false);
+    }
+  }
+
   if (!firebaseReady) {
     return (
       <section className="page-section">
-        <ErrorState
-          title="Configuration Firebase manquante"
-          description="Ajoutez les variables Vite avant d’utiliser les traitements."
-        />
+        <ErrorState title="Firebase manquant" description="Ajoutez la config pour utiliser les traitements." />
       </section>
     );
   }
@@ -191,64 +199,98 @@ export function TreatmentPage() {
   if (!user) {
     return (
       <section className="page-section">
-        <ErrorState
-          title="Connexion requise"
-          description="Connectez-vous avant d’enregistrer un traitement."
-        />
+        <ErrorState title="Connexion requise" description="Connectez-vous pour gérer les traitements." />
       </section>
     );
   }
 
   return (
     <section className="page-section">
-      <div className="page-heading">
+      <div className="page-heading page-heading--compact">
         <div>
           <h2>Traitement</h2>
-          <p className="page-heading__hint">Glissez une ligne vers la gauche pour la supprimer.</p>
         </div>
+
+        <button type="button" className="primary-button primary-button--compact" onClick={openCreateModal}>
+          Ajouter
+        </button>
       </div>
 
-      {loading ? <LoadingState label="Chargement du traitement…" /> : null}
-      {error ? <ErrorState title="Impossible de gérer le traitement" description={error} /> : null}
+      {loading ? <LoadingState label="Chargement…" /> : null}
+      {error ? <ErrorState title="Traitements indisponibles" description={error} /> : null}
 
-      {!loading && !error && drafts.length === 0 ? (
+      {!loading && !error && treatments.length === 0 ? (
         <EmptyState
           title="Aucun traitement"
-          description="Ajoutez une première ligne pour saisir un médicament et sa posologie matin / soir."
+          description="Ajoutez un médicament."
         />
       ) : null}
 
-      <div className="treatment-list">
-        {drafts.map((draft) => (
-          <form
-            key={draft.id}
-            className={`form-card treatment-row${
-              confirmedTreatmentId === draft.id ? " treatment-row--confirmed" : ""
+      <div className="treatment-list treatment-list--cards">
+        {treatments.map((treatment) => (
+          <article
+            key={treatment.id}
+            className={`treatment-card${
+              confirmedTreatmentId === treatment.id ? " treatment-card--confirmed" : ""
             }`}
-            onSubmit={(event) => {
-              void saveLine(event, draft);
-            }}
-            onTouchStart={(event) => handleTouchStart(event, draft.id)}
-            onTouchEnd={(event) => handleTouchEnd(event, draft)}
           >
+            <div className="treatment-card__header">
+              <div>
+                <h3 className="treatment-card__title">{treatment.name}</h3>
+              </div>
+              <div className="treatment-card__actions">
+                <button
+                  type="button"
+                  className="ghost-button ghost-button--compact"
+                  onClick={() => openEditModal(treatment)}
+                >
+                  Modifier
+                </button>
+                <button
+                  type="button"
+                  className="ghost-button ghost-button--compact ghost-button--danger"
+                  onClick={() => openDeleteModal(treatment)}
+                >
+                  Supprimer
+                </button>
+              </div>
+            </div>
+
+            <dl className="treatment-card__grid">
+              <div className="treatment-card__item">
+                <dt>Matin</dt>
+                <dd>{treatment.morningDose || "Non précisé"}</dd>
+              </div>
+              <div className="treatment-card__item">
+                <dt>Soir</dt>
+                <dd>{treatment.eveningDose || "Non précisé"}</dd>
+              </div>
+            </dl>
+          </article>
+        ))}
+      </div>
+
+      {modalState?.mode === "create" || modalState?.mode === "edit" ? (
+        <Modal title={modalState.mode === "create" ? "Nouveau traitement" : "Modifier le traitement"} onClose={closeModal}>
+          <form className="modal-stack" onSubmit={(event) => void handleSubmit(event)}>
             <label className="field">
               <span>Médicament</span>
               <input
                 type="text"
-                value={draft.name}
-                onChange={(event) => updateDraft(draft.id, "name", event.target.value)}
-                placeholder="Nom du médicament"
+                value={modalState.draft.name}
+                onChange={(event) => updateDraft("name", event.target.value)}
+                placeholder="Nom"
               />
             </label>
 
-            <div className="treatment-row__doses">
+            <div className="treatment-form__doses">
               <label className="field">
                 <span>Matin</span>
                 <input
                   type="text"
-                  value={draft.morningDose}
-                  onChange={(event) => updateDraft(draft.id, "morningDose", event.target.value)}
-                  placeholder="Dose matin"
+                  value={modalState.draft.morningDose}
+                  onChange={(event) => updateDraft("morningDose", event.target.value)}
+                  placeholder="Dose"
                 />
               </label>
 
@@ -256,46 +298,49 @@ export function TreatmentPage() {
                 <span>Soir</span>
                 <input
                   type="text"
-                  value={draft.eveningDose}
-                  onChange={(event) => updateDraft(draft.id, "eveningDose", event.target.value)}
-                  placeholder="Dose soir"
+                  value={modalState.draft.eveningDose}
+                  onChange={(event) => updateDraft("eveningDose", event.target.value)}
+                  placeholder="Dose"
                 />
               </label>
             </div>
 
-            <div className="treatment-row__actions">
-              <button type="submit" className="primary-button">
-                {draft.isNew ? "Créer" : "Modifier"}
+            <div className="modal-actions">
+              <button type="button" className="ghost-button ghost-button--compact" onClick={closeModal}>
+                Annuler
               </button>
-              <button
-                type="button"
-                className="ghost-button"
-                onClick={() => {
-                  void removeLine(draft);
-                }}
-              >
-                Supprimer
+              <button type="submit" className="primary-button primary-button--compact" disabled={submitting}>
+                {submitting ? "En cours…" : modalState.mode === "create" ? "Créer" : "Enregistrer"}
               </button>
             </div>
           </form>
-        ))}
-      </div>
+        </Modal>
+      ) : null}
 
-      <button type="button" className="primary-button" onClick={addLine}>
-        Ajouter un traitement
-      </button>
+      {modalState?.mode === "delete" ? (
+        <Modal title="Supprimer le traitement" onClose={closeModal}>
+          <div className="modal-stack">
+            <p className="modal-text">
+              Supprimer <strong>{modalState.treatment.name}</strong> ?
+            </p>
+            <div className="modal-actions">
+              <button type="button" className="ghost-button ghost-button--compact" onClick={closeModal}>
+                Annuler
+              </button>
+              <button
+                type="button"
+                className="primary-button primary-button--danger primary-button--compact"
+                onClick={() => {
+                  void handleDelete();
+                }}
+                disabled={submitting}
+              >
+                {submitting ? "Suppression…" : "Supprimer"}
+              </button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
     </section>
   );
-}
-
-function mergeDrafts(currentDrafts: TreatmentDraft[], treatments: Treatment[]) {
-  const newDrafts = currentDrafts.filter((draft) => draft.isNew);
-  const savedDrafts = treatments.map((treatment) => ({
-    id: treatment.id,
-    name: treatment.name,
-    morningDose: treatment.morningDose,
-    eveningDose: treatment.eveningDose
-  }));
-
-  return [...savedDrafts, ...newDrafts];
 }

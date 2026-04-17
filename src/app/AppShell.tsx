@@ -130,20 +130,20 @@ function TreatmentIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path
-        d="M7.25 9.5c0-1.8 1.45-3.25 3.25-3.25h3c1.8 0 3.25 1.45 3.25 3.25s-1.45 3.25-3.25 3.25h-3c-1.8 0-3.25-1.45-3.25-3.25Z"
+        d="M6 10.25c0-2.35 1.9-4.25 4.25-4.25h3.5c2.35 0 4.25 1.9 4.25 4.25s-1.9 4.25-4.25 4.25h-3.5C7.9 14.5 6 12.6 6 10.25Z"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="1.7"
+        strokeWidth="1.9"
       />
       <path
-        d="M12 6.25v6.5"
+        d="M12 6v8.5"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
-        strokeWidth="1.7"
+        strokeWidth="1.9"
       />
     </svg>
   );
