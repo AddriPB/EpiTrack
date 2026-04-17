@@ -29,6 +29,10 @@ export function TreatmentPage() {
   const [loading, setLoading] = useState(firebaseReady && Boolean(user));
   const [error, setError] = useState<string | null>(null);
   const swipeStartRef = useRef<Record<string, number>>({});
+  const knownTreatmentIdsRef = useRef<string[]>([]);
+  const pendingCreateRef = useRef(false);
+  const confirmationTimeoutRef = useRef<number | null>(null);
+  const [confirmedTreatmentId, setConfirmedTreatmentId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!firebaseReady || !user) {
@@ -43,7 +47,17 @@ export function TreatmentPage() {
     const unsubscribe = subscribeToTreatments(
       user.uid,
       (items) => {
+        const nextIds = items.map((item) => item.id);
+        const addedIds = nextIds.filter((id) => !knownTreatmentIdsRef.current.includes(id));
+
         setDrafts((currentDrafts) => mergeDrafts(currentDrafts, items));
+        knownTreatmentIdsRef.current = nextIds;
+
+        if (pendingCreateRef.current && addedIds.length > 0) {
+          showConfirmation(addedIds[addedIds.length - 1]);
+          pendingCreateRef.current = false;
+        }
+
         setLoading(false);
       },
       (message) => {
@@ -54,6 +68,14 @@ export function TreatmentPage() {
 
     return unsubscribe;
   }, [firebaseReady, user]);
+
+  useEffect(() => {
+    return () => {
+      if (confirmationTimeoutRef.current) {
+        window.clearTimeout(confirmationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   function updateDraft(id: string, key: keyof TreatmentDraft, value: string) {
     setDrafts((currentDrafts) =>
@@ -97,7 +119,9 @@ export function TreatmentPage() {
       };
 
       if (draft.isNew) {
+        pendingCreateRef.current = true;
         await createTreatment(user.uid, payload);
+        setDrafts((currentDrafts) => currentDrafts.filter((entry) => entry.id !== draft.id));
       } else {
         await updateTreatment(user.uid, draft.id, payload);
       }
@@ -138,6 +162,19 @@ export function TreatmentPage() {
     }
 
     delete swipeStartRef.current[draft.id];
+  }
+
+  function showConfirmation(id: string) {
+    setConfirmedTreatmentId(id);
+
+    if (confirmationTimeoutRef.current) {
+      window.clearTimeout(confirmationTimeoutRef.current);
+    }
+
+    confirmationTimeoutRef.current = window.setTimeout(() => {
+      setConfirmedTreatmentId(null);
+      confirmationTimeoutRef.current = null;
+    }, 1400);
   }
 
   if (!firebaseReady) {
@@ -185,7 +222,9 @@ export function TreatmentPage() {
         {drafts.map((draft) => (
           <form
             key={draft.id}
-            className="form-card treatment-row"
+            className={`form-card treatment-row${
+              confirmedTreatmentId === draft.id ? " treatment-row--confirmed" : ""
+            }`}
             onSubmit={(event) => {
               void saveLine(event, draft);
             }}
