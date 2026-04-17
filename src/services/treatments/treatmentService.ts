@@ -9,6 +9,7 @@ import {
   serverTimestamp,
   updateDoc
 } from "firebase/firestore";
+import { FirebaseError } from "firebase/app";
 import { Timestamp } from "firebase/firestore";
 import { getDb } from "../firebase/config";
 import { Treatment, TreatmentInput } from "../../shared/types/treatment";
@@ -24,24 +25,36 @@ function getTreatmentDocument(uid: string, treatmentId: string) {
 }
 
 export async function createTreatment(uid: string, input: TreatmentInput) {
-  await addDoc(getTreatmentsCollection(uid), {
-    name: input.name.trim(),
-    morningDose: input.morningDose.trim(),
-    eveningDose: input.eveningDose.trim(),
-    createdAt: serverTimestamp()
-  });
+  try {
+    await addDoc(getTreatmentsCollection(uid), {
+      name: input.name.trim(),
+      morningDose: input.morningDose.trim(),
+      eveningDose: input.eveningDose.trim(),
+      createdAt: serverTimestamp()
+    });
+  } catch (error) {
+    throw toTreatmentError(error);
+  }
 }
 
 export async function updateTreatment(uid: string, treatmentId: string, input: TreatmentInput) {
-  await updateDoc(getTreatmentDocument(uid, treatmentId), {
-    name: input.name.trim(),
-    morningDose: input.morningDose.trim(),
-    eveningDose: input.eveningDose.trim()
-  });
+  try {
+    await updateDoc(getTreatmentDocument(uid, treatmentId), {
+      name: input.name.trim(),
+      morningDose: input.morningDose.trim(),
+      eveningDose: input.eveningDose.trim()
+    });
+  } catch (error) {
+    throw toTreatmentError(error);
+  }
 }
 
 export async function deleteTreatment(uid: string, treatmentId: string) {
-  await deleteDoc(getTreatmentDocument(uid, treatmentId));
+  try {
+    await deleteDoc(getTreatmentDocument(uid, treatmentId));
+  } catch (error) {
+    throw toTreatmentError(error);
+  }
 }
 
 export function subscribeToTreatments(
@@ -69,7 +82,7 @@ export function subscribeToTreatments(
       onSuccess(items);
     },
     (error) => {
-      onError(error.message);
+      onError(toTreatmentError(error).message);
     }
   );
 }
@@ -80,4 +93,18 @@ function serializeTimestamp(timestamp: unknown) {
   }
 
   return null;
+}
+
+function toTreatmentError(error: unknown) {
+  if (error instanceof FirebaseError && error.code === "permission-denied") {
+    return new Error(
+      "Permissions Firestore insuffisantes pour les traitements. Ajoutez la règle users/{uid}/treatments/{treatmentId}."
+    );
+  }
+
+  if (error instanceof Error) {
+    return error;
+  }
+
+  return new Error("Opération traitement impossible.");
 }

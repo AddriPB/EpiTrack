@@ -87,6 +87,7 @@ Cette base sépare la logique métier, la persistance et l’UI. Elle permet d�
 Structure proposée :
 
 - `users/{uid}/epilepsyEvents/{eventId}`
+- `users/{uid}/treatments/{treatmentId}`
 
 Exemple de document :
 
@@ -204,6 +205,7 @@ Exemple pour ce dépôt :
 ### 4. Structure des données
 
 - Les documents sont créés automatiquement dans `users/{uid}/epilepsyEvents`
+- Les traitements sont créés automatiquement dans `users/{uid}/treatments`
 
 ### 5. Règles Firestore
 
@@ -216,9 +218,17 @@ service cloud.firestore {
     match /users/{uid}/epilepsyEvents/{eventId} {
       allow read, write: if request.auth != null && request.auth.uid == uid;
     }
+
+    match /users/{uid}/treatments/{treatmentId} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+    }
   }
 }
 ```
+
+Note :
+
+- sans la règle `treatments`, la création et la modification des traitements échouent avec `insufficient permissions`
 
 ## Variables GitHub Actions à configurer
 
