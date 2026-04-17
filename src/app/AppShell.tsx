@@ -132,7 +132,7 @@ function TreatmentIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path
-        d="M7.25 8.25c0-1.8 1.45-3.25 3.25-3.25h1.25c1.8 0 3.25 1.45 3.25 3.25s-1.45 3.25-3.25 3.25H10.5c-1.8 0-3.25-1.45-3.25-3.25Z"
+        d="M8 4.75h8M9 7.25h6M8.5 6.5h7a1.5 1.5 0 0 1 1.5 1.5v8.75A2.25 2.25 0 0 1 14.75 19h-5.5A2.25 2.25 0 0 1 7 16.75V8a1.5 1.5 0 0 1 1.5-1.5Z"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
@@ -140,23 +140,7 @@ function TreatmentIcon() {
         strokeWidth="1.9"
       />
       <path
-        d="M11.25 5v6.5"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.9"
-      />
-      <path
-        d="M9.25 14.25c0-1.52 1.23-2.75 2.75-2.75h2.75c1.52 0 2.75 1.23 2.75 2.75S16.27 17 14.75 17H12c-1.52 0-2.75-1.23-2.75-2.75Z"
-        fill="none"
-        stroke="currentColor"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth="1.9"
-      />
-      <path
-        d="M13.75 11.5V17"
+        d="M12 10v5m-2.5-2.5h5"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"
