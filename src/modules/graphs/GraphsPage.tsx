@@ -213,11 +213,6 @@ function StatsAverageCard({
       </div>
 
       <p className="stats-card__range">{average.total} crise(s) sur {average.months} mois glissants</p>
-      <p className="stats-card__comparison">
-        Fenêtre choisie :
-        {" "}
-        <strong className="stats-card__period-value">{formatAveragePeriodLabel(period)}</strong>
-      </p>
     </article>
   );
 }
@@ -231,7 +226,7 @@ function StatsTrendCard({
 }) {
   return (
     <article className="stats-card">
-      <p className="section-label">{window.label}</p>
+      <p className="section-label">{formatDateRange(window.start, window.end)}</p>
       <div className="stats-card__row">
         <div>
           <span className="stats-card__label">Total crises</span>
@@ -247,7 +242,6 @@ function StatsTrendCard({
         </div>
       </div>
 
-      <p className="stats-card__range">{formatDateRange(window.start, window.end)}</p>
       <p className="stats-card__comparison">Période précédente : {summary.previous} crise(s)</p>
     </article>
   );
