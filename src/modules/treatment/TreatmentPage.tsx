@@ -4,6 +4,7 @@ import { EmptyState } from "../../shared/components/EmptyState";
 import { ErrorState } from "../../shared/components/ErrorState";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { Modal } from "../../shared/components/Modal";
+import { FlashNotice } from "../../shared/components/FlashNotice";
 import { useAuth } from "../../services/auth/AuthContext";
 import { isFirebaseConfigured } from "../../services/firebase/config";
 import {
@@ -13,6 +14,7 @@ import {
   updateTreatment
 } from "../../services/treatments/treatmentService";
 import { Treatment, TreatmentInput } from "../../shared/types/treatment";
+import { pushFlashNotice } from "../../shared/utils/flash";
 
 type ModalState =
   | { mode: "create"; draft: TreatmentInput }
@@ -172,9 +174,11 @@ export function TreatmentPage() {
       if (modalState.mode === "create") {
         pendingCreateRef.current = true;
         await createTreatment(user.uid, modalState.draft);
+        pushFlashNotice("Traitement enregistré");
       } else {
         await updateTreatment(user.uid, modalState.treatmentId, modalState.draft);
         showConfirmation(modalState.treatmentId);
+        pushFlashNotice("Traitement enregistré");
       }
 
       closeModal();
@@ -195,6 +199,7 @@ export function TreatmentPage() {
 
     try {
       await deleteTreatment(user.uid, modalState.treatment.id);
+      pushFlashNotice("Traitement supprimé");
       closeModal();
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Suppression impossible.");
@@ -225,6 +230,8 @@ export function TreatmentPage() {
           <h2>Traitement</h2>
         </div>
       </div>
+
+      <FlashNotice />
 
       {loading ? <LoadingState label="Chargement…" /> : null}
       {error ? <ErrorState title="Traitements indisponibles" description={error} /> : null}

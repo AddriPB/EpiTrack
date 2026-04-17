@@ -7,6 +7,7 @@ import { formatInputDate } from "../../shared/utils/date";
 import { isFirebaseConfigured } from "../../services/firebase/config";
 import { ErrorState } from "../../shared/components/ErrorState";
 import { useAuth } from "../../services/auth/AuthContext";
+import { pushFlashNotice } from "../../shared/utils/flash";
 
 const DEFAULT_COLOR: EventColor = "yellow";
 
@@ -42,7 +43,7 @@ export function AddEventPage() {
         color,
         observation: observation.trim() || undefined
       });
-      window.sessionStorage.setItem("epitrack-flash", "Enregistrée");
+      pushFlashNotice("Crise enregistrée");
       navigate("/calendar");
     } catch (submissionError) {
       setError(submissionError instanceof Error ? submissionError.message : "Enregistrement impossible.");
@@ -129,7 +130,7 @@ export function AddEventPage() {
         {error ? <p className="form-error">{error}</p> : null}
 
         <button type="submit" className="primary-button primary-button--compact" disabled={saving}>
-          {saving ? "Enregistrement…" : "Valider"}
+          {saving ? "Enregistrement…" : "Enregistrer"}
         </button>
       </form>
     </section>

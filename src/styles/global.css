@@ -17,8 +17,15 @@
   --color-accent-orange-soft: #533220;
   --color-accent-red: #d16d71;
   --color-accent-red-soft: #552a32;
-  --color-success: #2f8f5b;
-  --color-danger: #b54848;
+  --color-data-yellow: #d9b347;
+  --color-data-orange: #d98449;
+  --color-data-red: #d16d71;
+  --color-state-success: #2f8f5b;
+  --color-state-success-soft: #183b2a;
+  --color-state-danger: #b54848;
+  --color-state-danger-soft: #4c2428;
+  --color-action-danger: #c45a63;
+  --color-action-danger-soft: #4f252c;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -133,7 +140,7 @@ textarea:focus-visible {
 }
 
 .app-brand__epi {
-  color: var(--color-accent-orange);
+  color: var(--color-data-orange);
 }
 
 .app-brand__track {
@@ -316,13 +323,13 @@ h3 {
 }
 
 .primary-button--danger {
-  background: var(--color-accent-red);
+  background: var(--color-action-danger);
   color: #fff4f4;
 }
 
 .ghost-button--danger {
-  color: var(--color-accent-red);
-  border-color: rgba(209, 109, 113, 0.28);
+  color: var(--color-action-danger);
+  border-color: rgba(196, 90, 99, 0.28);
 }
 
 .icon-button {
@@ -477,11 +484,11 @@ h3 {
 }
 
 .stat-card--amber::before {
-  background: linear-gradient(180deg, var(--color-accent-yellow), var(--color-accent-orange));
+  background: linear-gradient(180deg, var(--color-data-yellow), var(--color-data-orange));
 }
 
 .stat-card--red::before {
-  background: var(--color-accent-red);
+  background: var(--color-data-red);
 }
 
 .stat-card--total::before {
@@ -549,9 +556,9 @@ h3 {
 }
 
 .stats-card__trend--up {
-  border-color: rgba(209, 109, 113, 0.34);
-  background: rgba(85, 42, 50, 0.52);
-  color: var(--color-accent-red);
+  border-color: rgba(181, 72, 72, 0.34);
+  background: rgba(76, 36, 40, 0.52);
+  color: var(--color-state-danger);
 }
 
 .stats-card__trend--down {
@@ -720,18 +727,18 @@ h3 {
 
 .event-dot--yellow,
 .color-choice__dot--yellow {
-  background: var(--color-accent-yellow);
+  background: var(--color-data-yellow);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
 }
 
 .event-dot--orange,
 .color-choice__dot--orange {
-  background: var(--color-accent-orange);
+  background: var(--color-data-orange);
 }
 
 .event-dot--red,
 .color-choice__dot--red {
-  background: var(--color-accent-red);
+  background: var(--color-data-red);
 }
 
 .event-overflow {
@@ -780,7 +787,7 @@ h3 {
 }
 
 .chart__dot {
-  fill: var(--color-accent-orange);
+  fill: var(--color-data-orange);
 }
 
 .chart__point-value {
@@ -1091,15 +1098,15 @@ h3 {
 }
 
 .color-choice__input--yellow {
-  accent-color: var(--color-accent-yellow);
+  accent-color: var(--color-data-yellow);
 }
 
 .color-choice__input--orange {
-  accent-color: var(--color-accent-orange);
+  accent-color: var(--color-data-orange);
 }
 
 .color-choice__input--red {
-  accent-color: var(--color-accent-red);
+  accent-color: var(--color-data-red);
 }
 
 .color-choice__label {
@@ -1122,19 +1129,19 @@ h3 {
 }
 
 .color-choice__label--yellow {
-  color: var(--color-accent-yellow);
+  color: var(--color-data-yellow);
 }
 
 .color-choice__label--orange {
-  color: var(--color-accent-orange);
+  color: var(--color-data-orange);
 }
 
 .color-choice__label--red {
-  color: var(--color-accent-red);
+  color: var(--color-data-red);
 }
 
 .form-error {
-  color: var(--color-danger);
+  color: var(--color-state-danger);
   font-size: 0.92rem;
 }
 

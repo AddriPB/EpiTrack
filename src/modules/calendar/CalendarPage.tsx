@@ -16,6 +16,7 @@ import {
 import { CreateEpilepsyEventInput, EpilepsyEvent, EventColor } from "../../shared/types/event";
 import { useAuth } from "../../services/auth/AuthContext";
 import { EVENT_COLORS } from "../../shared/constants/designTokens";
+import { pushFlashNotice } from "../../shared/utils/flash";
 
 type CalendarView = "month" | "year";
 type DayModalMode = "actions" | "edit" | "delete";
@@ -99,7 +100,7 @@ export function CalendarPage() {
         )
       );
 
-      window.sessionStorage.setItem("epitrack-flash", "Crises modifiées");
+      pushFlashNotice("Crises enregistrées");
       closeModal();
     } catch (submissionError) {
       setModalError(submissionError instanceof Error ? submissionError.message : "Modification impossible.");
@@ -121,7 +122,7 @@ export function CalendarPage() {
         user.uid,
         activeDay.events.map((entry) => entry.id)
       );
-      window.sessionStorage.setItem("epitrack-flash", "Crises supprimées");
+      pushFlashNotice("Crises supprimées");
       closeModal();
     } catch (submissionError) {
       setModalError(submissionError instanceof Error ? submissionError.message : "Suppression impossible.");
@@ -234,19 +235,28 @@ export function CalendarPage() {
               <p className="modal-text">
                 {activeDay.events.length} crise(s) enregistrée(s) sur cette journée.
               </p>
+              <div className="modal-actions">
+                <button
+                  type="button"
+                  className="ghost-button ghost-button--compact"
+                  onClick={closeModal}
+                >
+                  Annuler
+                </button>
+                <button
+                  type="button"
+                  className="primary-button primary-button--compact"
+                  onClick={() => setModalMode("edit")}
+                >
+                  Modifier
+                </button>
+              </div>
               <button
                 type="button"
-                className="primary-button"
-                onClick={() => setModalMode("edit")}
-              >
-                Modifier crises
-              </button>
-              <button
-                type="button"
-                className="ghost-button"
+                className="ghost-button ghost-button--compact ghost-button--danger"
                 onClick={() => setModalMode("delete")}
               >
-                Supprimer crises
+                Supprimer
               </button>
             </div>
           ) : null}
@@ -310,11 +320,11 @@ export function CalendarPage() {
               {modalError ? <p className="form-error">{modalError}</p> : null}
 
               <div className="modal-actions">
-                <button type="button" className="ghost-button" onClick={closeModal}>
+                <button type="button" className="ghost-button ghost-button--compact" onClick={closeModal}>
                   Annuler
                 </button>
-                <button type="submit" className="primary-button" disabled={modalBusy}>
-                  {modalBusy ? "Enregistrement…" : "Valider"}
+                <button type="submit" className="primary-button primary-button--compact" disabled={modalBusy}>
+                  {modalBusy ? "Enregistrement…" : "Enregistrer"}
                 </button>
               </div>
             </form>
@@ -327,18 +337,22 @@ export function CalendarPage() {
               </p>
               {modalError ? <p className="form-error">{modalError}</p> : null}
               <div className="modal-actions">
-                <button type="button" className="ghost-button" onClick={() => setModalMode("actions")}>
+                <button
+                  type="button"
+                  className="ghost-button ghost-button--compact"
+                  onClick={() => setModalMode("actions")}
+                >
                   Retour
                 </button>
                 <button
                   type="button"
-                  className="primary-button primary-button--danger"
+                  className="primary-button primary-button--danger primary-button--compact"
                   disabled={modalBusy}
                   onClick={() => {
                     void handleDeleteDayEvents();
                   }}
                 >
-                  {modalBusy ? "Suppression…" : "Supprimer toutes les crises"}
+                  {modalBusy ? "Suppression…" : "Supprimer"}
                 </button>
               </div>
             </div>

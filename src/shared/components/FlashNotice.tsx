@@ -1,24 +1,46 @@
 import { useEffect, useState } from "react";
+import { consumeFlashNotice, getFlashEventName } from "../utils/flash";
 
 export function FlashNotice() {
   const [message, setMessage] = useState<string | null>(null);
 
   useEffect(() => {
-    const flash = window.sessionStorage.getItem("epitrack-flash");
+    let timeoutId: number | null = null;
 
-    if (!flash) {
-      return;
+    function show(nextMessage: string) {
+      setMessage(nextMessage);
+
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+
+      timeoutId = window.setTimeout(() => {
+        setMessage(null);
+        timeoutId = null;
+      }, 2000);
     }
 
-    setMessage(flash);
-    window.sessionStorage.removeItem("epitrack-flash");
+    const initialMessage = consumeFlashNotice();
+    if (initialMessage) {
+      show(initialMessage);
+    }
 
-    const timeoutId = window.setTimeout(() => {
-      setMessage(null);
-    }, 2000);
+    function handleFlash(event: Event) {
+      const customEvent = event as CustomEvent<string>;
+      const persistedMessage = consumeFlashNotice();
+
+      if (persistedMessage ?? customEvent.detail) {
+        show(persistedMessage ?? customEvent.detail);
+      }
+    }
+
+    window.addEventListener(getFlashEventName(), handleFlash as EventListener);
 
     return () => {
-      window.clearTimeout(timeoutId);
+      window.removeEventListener(getFlashEventName(), handleFlash as EventListener);
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
     };
   }, []);
 
