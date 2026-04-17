@@ -4,6 +4,7 @@ import { AddEventPage } from "../modules/events/AddEventPage";
 import { CalendarPage } from "../modules/calendar/CalendarPage";
 import { GraphsPage } from "../modules/graphs/GraphsPage";
 import { AuthPage } from "../modules/auth/AuthPage";
+import { TreatmentPage } from "../modules/treatment/TreatmentPage";
 import { LoadingState } from "../shared/components/LoadingState";
 import { useAuth } from "../services/auth/AuthContext";
 
@@ -46,6 +47,7 @@ export function App() {
         <Route path="/" element={<Navigate to="/calendar" replace />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/stats" element={<GraphsPage />} />
+        <Route path="/treatment" element={<TreatmentPage />} />
         <Route path="/graphs" element={<Navigate to="/stats" replace />} />
         <Route path="/add" element={<AddEventPage />} />
         <Route path="*" element={<Navigate to="/calendar" replace />} />

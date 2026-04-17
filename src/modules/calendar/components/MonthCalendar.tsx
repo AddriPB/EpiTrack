@@ -7,9 +7,10 @@ type MonthCalendarProps = {
   year: number;
   monthIndex: number;
   events: EpilepsyEvent[];
+  onDayLongPress: (day: { dateKey: string; label: string; events: EpilepsyEvent[] }) => void;
 };
 
-export function MonthCalendar({ year, monthIndex, events }: MonthCalendarProps) {
+export function MonthCalendar({ year, monthIndex, events, onDayLongPress }: MonthCalendarProps) {
   const days = getCalendarDays(year, monthIndex);
   const weekdayLabels = getWeekdayLabels();
   const eventsByDay = groupEventsByDay(events);
@@ -38,6 +39,31 @@ export function MonthCalendar({ year, monthIndex, events }: MonthCalendarProps) 
               aria-label={`${day.day} ${getMonthLabelShort(day.year, day.monthIndex)}${
                 dayEvents.length ? `, ${dayEvents.length} crise(s)` : ""
               }`}
+              onPointerDown={(event) => {
+                if (!day.isCurrentMonth || dayEvents.length === 0) {
+                  return;
+                }
+
+                const article = event.currentTarget;
+
+                const timeoutId = window.setTimeout(() => {
+                  onDayLongPress({
+                    dateKey: day.dateKey,
+                    label: `${day.day} ${getMonthLabelShort(day.year, day.monthIndex)}`,
+                    events: dayEvents
+                  });
+                }, 420);
+
+                const clearPress = () => {
+                  window.clearTimeout(timeoutId);
+                  article.removeEventListener("pointerup", clearPress);
+                  article.removeEventListener("pointerleave", clearPress);
+                  article.removeEventListener("pointercancel", clearPress);
+                };
+                article.addEventListener("pointerup", clearPress, { once: true });
+                article.addEventListener("pointerleave", clearPress, { once: true });
+                article.addEventListener("pointercancel", clearPress, { once: true });
+              }}
             >
               <span className="calendar-day__number">{day.day}</span>
 

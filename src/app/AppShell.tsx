@@ -9,6 +9,7 @@ type AppShellProps = PropsWithChildren<{
 
 const navItems = [
   { to: "/calendar", label: "Calendrier", icon: CalendarIcon },
+  { to: "/treatment", label: "Traitement", icon: TreatmentIcon },
   { to: "/stats", label: "Statistiques", icon: StatsIcon }
 ];
 
@@ -115,6 +116,29 @@ function StatsIcon() {
       />
       <path
         d="m6.75 8.25 3.75-2.25 3 2.25 3.75-3"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.7"
+      />
+    </svg>
+  );
+}
+
+function TreatmentIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M8.25 6.75a3.75 3.75 0 0 1 7.5 0v2.25a3.75 3.75 0 1 1-7.5 0V6.75Z"
+        fill="none"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="1.7"
+      />
+      <path
+        d="M8.75 8.25h6.5M9.25 12.75l5.5 5.5M14.75 12.75l-5.5 5.5"
         fill="none"
         stroke="currentColor"
         strokeLinecap="round"

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { FormEvent, useMemo, useState } from "react";
 import { YearSummaryGrid } from "./components/YearSummaryGrid";
 import { MonthCalendar } from "./components/MonthCalendar";
 import { useEpilepsyEvents } from "./hooks/useEpilepsyEvents";
@@ -8,12 +8,33 @@ import { FlashNotice } from "../../shared/components/FlashNotice";
 import { LoadingState } from "../../shared/components/LoadingState";
 import { ErrorState } from "../../shared/components/ErrorState";
 import { StatCards } from "../../shared/components/StatCards";
+import { Modal } from "../../shared/components/Modal";
+import {
+  deleteEpilepsyEvents,
+  updateEpilepsyEvent
+} from "../../services/epilepsy-events/eventService";
+import { CreateEpilepsyEventInput, EpilepsyEvent, EventColor } from "../../shared/types/event";
+import { useAuth } from "../../services/auth/AuthContext";
+import { EVENT_COLORS } from "../../shared/constants/designTokens";
 
 type CalendarView = "month" | "year";
+type DayModalMode = "actions" | "edit" | "delete";
+type EditableDayEvent = {
+  id: string;
+  date: string;
+  color: EventColor;
+  observation: string;
+};
 
 export function CalendarPage() {
+  const { user } = useAuth();
   const [view, setView] = useState<CalendarView>("month");
   const [currentMonth, setCurrentMonth] = useState(() => buildYearSummary(new Date()));
+  const [modalMode, setModalMode] = useState<DayModalMode | null>(null);
+  const [activeDay, setActiveDay] = useState<{ label: string; events: EpilepsyEvent[] } | null>(null);
+  const [editableEvents, setEditableEvents] = useState<EditableDayEvent[]>([]);
+  const [modalBusy, setModalBusy] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
   const { year, monthIndex } = currentMonth;
   const { events, loading, error, firebaseReady } = useEpilepsyEvents(year);
 
@@ -27,6 +48,86 @@ export function CalendarPage() {
   const title = view === "month" ? getMonthLabel(year, monthIndex) : String(year);
   const previousStep = view === "month" ? -1 : -12;
   const nextStep = view === "month" ? 1 : 12;
+
+  function closeModal() {
+    setModalMode(null);
+    setActiveDay(null);
+    setEditableEvents([]);
+    setModalBusy(false);
+    setModalError(null);
+  }
+
+  function openDayActions(day: { dateKey: string; label: string; events: EpilepsyEvent[] }) {
+    setActiveDay(day);
+    setEditableEvents(
+      day.events.map((event) => ({
+        id: event.id,
+        date: event.dateKey,
+        color: event.color,
+        observation: event.observation ?? ""
+      }))
+    );
+    setModalMode("actions");
+    setModalError(null);
+  }
+
+  function updateEditableEvent(id: string, patch: Partial<EditableDayEvent>) {
+    setEditableEvents((currentItems) =>
+      currentItems.map((item) => (item.id === id ? { ...item, ...patch } : item))
+    );
+  }
+
+  async function handleSaveDayEvents(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!user || !activeDay) {
+      setModalError("Connexion requise.");
+      return;
+    }
+
+    setModalBusy(true);
+    setModalError(null);
+
+    try {
+      await Promise.all(
+        editableEvents.map((item) =>
+          updateEpilepsyEvent(user.uid, item.id, {
+            date: item.date,
+            color: item.color,
+            observation: item.observation.trim() || undefined
+          } satisfies CreateEpilepsyEventInput)
+        )
+      );
+
+      window.sessionStorage.setItem("epitrack-flash", "Crises modifiées");
+      closeModal();
+    } catch (submissionError) {
+      setModalError(submissionError instanceof Error ? submissionError.message : "Modification impossible.");
+      setModalBusy(false);
+    }
+  }
+
+  async function handleDeleteDayEvents() {
+    if (!user || !activeDay) {
+      setModalError("Connexion requise.");
+      return;
+    }
+
+    setModalBusy(true);
+    setModalError(null);
+
+    try {
+      await deleteEpilepsyEvents(
+        user.uid,
+        activeDay.events.map((entry) => entry.id)
+      );
+      window.sessionStorage.setItem("epitrack-flash", "Crises supprimées");
+      closeModal();
+    } catch (submissionError) {
+      setModalError(submissionError instanceof Error ? submissionError.message : "Suppression impossible.");
+      setModalBusy(false);
+    }
+  }
 
   return (
     <section className="page-section">
@@ -105,11 +206,144 @@ export function CalendarPage() {
           />
 
           {view === "month" ? (
-            <MonthCalendar year={year} monthIndex={monthIndex} events={monthSummary.events} />
+            <MonthCalendar
+              year={year}
+              monthIndex={monthIndex}
+              events={monthSummary.events}
+              onDayLongPress={openDayActions}
+            />
           ) : (
             <YearSummaryGrid year={year} months={yearSummary.months} />
           )}
         </>
+      ) : null}
+
+      {modalMode && activeDay ? (
+        <Modal
+          title={
+            modalMode === "actions"
+              ? `Crises du ${activeDay.label}`
+              : modalMode === "edit"
+                ? `Modifier les crises du ${activeDay.label}`
+                : `Supprimer les crises du ${activeDay.label}`
+          }
+          onClose={closeModal}
+        >
+          {modalMode === "actions" ? (
+            <div className="modal-stack">
+              <p className="modal-text">
+                {activeDay.events.length} crise(s) enregistrée(s) sur cette journée.
+              </p>
+              <button
+                type="button"
+                className="primary-button"
+                onClick={() => setModalMode("edit")}
+              >
+                Modifier crises
+              </button>
+              <button
+                type="button"
+                className="ghost-button"
+                onClick={() => setModalMode("delete")}
+              >
+                Supprimer crises
+              </button>
+            </div>
+          ) : null}
+
+          {modalMode === "edit" ? (
+            <form className="modal-stack" onSubmit={(event) => void handleSaveDayEvents(event)}>
+              <div className="edit-events-list">
+                {editableEvents.map((item, index) => (
+                  <article key={item.id} className="form-card edit-event-card">
+                    <p className="section-label">Crise {index + 1}</p>
+
+                    <label className="field field--date">
+                      <span>Date</span>
+                      <input
+                        type="date"
+                        value={item.date}
+                        onChange={(event) => updateEditableEvent(item.id, { date: event.target.value })}
+                        required
+                      />
+                    </label>
+
+                    <fieldset className="field fieldset fieldset--severity">
+                      <legend>Gravité</legend>
+                      <div className="color-picker" role="radiogroup" aria-label={`Gravité crise ${index + 1}`}>
+                        {EVENT_COLORS.map((choice) => (
+                          <label
+                            key={choice.value}
+                            className={`color-choice${item.color === choice.value ? " color-choice--selected" : ""}`}
+                          >
+                            <input
+                              type="radio"
+                              name={`color-${item.id}`}
+                              value={choice.value}
+                              checked={item.color === choice.value}
+                              onChange={() => updateEditableEvent(item.id, { color: choice.value })}
+                              className={`color-choice__input color-choice__input--${choice.value}`}
+                            />
+                            <span className={`color-choice__label color-choice__label--${choice.value}`}>
+                              {choice.label}
+                            </span>
+                          </label>
+                        ))}
+                      </div>
+                    </fieldset>
+
+                    <label className="field">
+                      <span>Observation</span>
+                      <textarea
+                        rows={2}
+                        value={item.observation}
+                        onChange={(event) =>
+                          updateEditableEvent(item.id, { observation: event.target.value })
+                        }
+                        placeholder="Facultatif"
+                      />
+                    </label>
+                  </article>
+                ))}
+              </div>
+
+              {modalError ? <p className="form-error">{modalError}</p> : null}
+
+              <div className="modal-actions">
+                <button type="button" className="ghost-button" onClick={closeModal}>
+                  Annuler
+                </button>
+                <button type="submit" className="primary-button" disabled={modalBusy}>
+                  {modalBusy ? "Enregistrement…" : "Valider"}
+                </button>
+              </div>
+            </form>
+          ) : null}
+
+          {modalMode === "delete" ? (
+            <div className="modal-stack">
+              <p className="modal-text">
+                Cette action supprime définitivement toutes les crises enregistrées pour le {activeDay.label}.
+              </p>
+              {modalError ? <p className="form-error">{modalError}</p> : null}
+              <div className="modal-actions">
+                <button type="button" className="ghost-button" onClick={() => setModalMode("actions")}>
+                  Retour
+                </button>
+                <button
+                  type="button"
+                  className="primary-button primary-button--danger"
+                  disabled={modalBusy}
+                  onClick={() => {
+                    void handleDeleteDayEvents();
+                  }}
+                >
+                  {modalBusy ? "Suppression…" : "Supprimer toutes les crises"}
+                </button>
+              </div>
+            </div>
+          ) : null}
+        </Modal>
       ) : null}
     </section>
   );

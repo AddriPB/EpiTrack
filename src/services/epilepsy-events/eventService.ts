@@ -1,9 +1,12 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
+  doc,
   onSnapshot,
   query,
   serverTimestamp,
+  updateDoc,
   where
 } from "firebase/firestore";
 import { getDb } from "../firebase/config";
@@ -16,6 +19,10 @@ function getUserEventsCollection(uid: string) {
   return collection(getDb(), "users", uid, COLLECTION_NAME);
 }
 
+function getUserEventDocument(uid: string, eventId: string) {
+  return doc(getDb(), "users", uid, COLLECTION_NAME, eventId);
+}
+
 export async function saveEpilepsyEvent(uid: string, input: CreateEpilepsyEventInput) {
   const payload = toFirestorePayload(input);
   const collectionRef = getUserEventsCollection(uid);
@@ -24,6 +31,22 @@ export async function saveEpilepsyEvent(uid: string, input: CreateEpilepsyEventI
     ...payload,
     createdAt: serverTimestamp()
   });
+}
+
+export async function updateEpilepsyEvent(
+  uid: string,
+  eventId: string,
+  input: CreateEpilepsyEventInput
+) {
+  await updateDoc(getUserEventDocument(uid, eventId), toFirestorePayload(input));
+}
+
+export async function deleteEpilepsyEvent(uid: string, eventId: string) {
+  await deleteDoc(getUserEventDocument(uid, eventId));
+}
+
+export async function deleteEpilepsyEvents(uid: string, eventIds: string[]) {
+  await Promise.all(eventIds.map((eventId) => deleteEpilepsyEvent(uid, eventId)));
 }
 
 export function subscribeToYearEvents(

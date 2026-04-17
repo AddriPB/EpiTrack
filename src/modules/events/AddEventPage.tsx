@@ -82,7 +82,7 @@ export function AddEventPage() {
       </div>
 
       <form className="form-card form-card--entry" onSubmit={handleSubmit}>
-        <label className="field">
+        <label className="field field--date">
           <span>Date</span>
           <input
             type="date"
@@ -92,7 +92,7 @@ export function AddEventPage() {
           />
         </label>
 
-        <fieldset className="field fieldset">
+        <fieldset className="field fieldset fieldset--severity">
           <legend>Gravité</legend>
           <div className="color-picker" role="radiogroup" aria-label="Choisir une couleur">
             {EVENT_COLORS.map((item) => (
@@ -107,10 +107,6 @@ export function AddEventPage() {
                   checked={color === item.value}
                   onChange={() => setColor(item.value)}
                   className={`color-choice__input color-choice__input--${item.value}`}
-                />
-                <span
-                  className={`color-choice__dot color-choice__dot--${item.value}`}
-                  aria-hidden="true"
                 />
                 <span className={`color-choice__label color-choice__label--${item.value}`}>
                   {item.label}
