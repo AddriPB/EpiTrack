@@ -770,12 +770,16 @@ h3 {
   background: rgba(7, 11, 16, 0.68);
   backdrop-filter: blur(8px);
   z-index: 50;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal-card {
   width: min(100%, 34rem);
   max-height: min(84vh, 48rem);
   display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
   gap: var(--space-3);
   overflow: hidden;
 }
@@ -790,6 +794,9 @@ h3 {
 .modal-card__body {
   min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
 }
 
 .modal-stack {
