@@ -20,6 +20,7 @@ type RollingWindow = {
 
 type TrendSummary = {
   current: number;
+  currentSevere: number;
   previous: number;
   change: number;
   direction: "up" | "down" | "flat";
@@ -242,6 +243,7 @@ function StatsTrendCard({
         </div>
       </div>
 
+      <p className="stats-card__comparison">Dont {summary.currentSevere} grave(s)</p>
       <p className="stats-card__comparison">Période précédente : {summary.previous} crise(s)</p>
     </article>
   );
@@ -249,12 +251,14 @@ function StatsTrendCard({
 
 function buildTrendSummary(events: EpilepsyEvent[], currentWindow: RollingWindow): TrendSummary {
   const current = countEventsInRange(events, currentWindow.start, currentWindow.end);
+  const currentSevere = countEventsInRange(events, currentWindow.start, currentWindow.end, "red");
   const previousWindow = buildPreviousWindow(currentWindow);
   const previous = countEventsInRange(events, previousWindow.start, previousWindow.end);
   const change = calculatePercentChange(current, previous);
 
   return {
     current,
+    currentSevere,
     previous,
     change,
     direction: getTrendDirection(change)
@@ -334,11 +338,26 @@ function getRequiredYears(
   ).sort((left, right) => left - right);
 }
 
-function countEventsInRange(events: EpilepsyEvent[], start: Date, end: Date) {
+function countEventsInRange(
+  events: EpilepsyEvent[],
+  start: Date,
+  end: Date,
+  color?: EpilepsyEvent["color"]
+) {
   const startKey = toDateKey(start);
   const endKey = toDateKey(end);
 
-  return events.filter((event) => event.dateKey >= startKey && event.dateKey <= endKey).length;
+  return events.filter((event) => {
+    if (event.dateKey < startKey || event.dateKey > endKey) {
+      return false;
+    }
+
+    if (color && event.color !== color) {
+      return false;
+    }
+
+    return true;
+  }).length;
 }
 
 function calculatePercentChange(current: number, previous: number) {

@@ -11,8 +11,8 @@ type AppShellProps = PropsWithChildren<{
 
 const navItems = [
   { to: "/calendar", label: "Calendrier", icon: CalendarIcon },
-  { to: "/treatment", label: "Traitement", icon: TreatmentIcon },
-  { to: "/stats", label: "Statistiques", icon: StatsIcon }
+  { to: "/stats", label: "Statistiques", icon: StatsIcon },
+  { to: "/treatment", label: "Traitement", icon: TreatmentIcon }
 ];
 
 export function AppShell({ children, showFab, fabTo, fabLabel }: AppShellProps) {
