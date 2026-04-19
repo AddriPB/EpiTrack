@@ -535,6 +535,24 @@ h3 {
   line-height: 0.95;
 }
 
+.stats-card__value-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-top: 0.14rem;
+}
+
+.stats-card__value-row .stats-card__value {
+  margin-top: 0;
+}
+
+.stats-card__severe {
+  color: var(--color-state-danger);
+  font-size: 0.74rem;
+  line-height: 1.2;
+}
+
 .stats-card__trend {
   min-width: 7.8rem;
   padding: 0.48rem 0.6rem;

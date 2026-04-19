@@ -231,7 +231,10 @@ function StatsTrendCard({
       <div className="stats-card__row">
         <div>
           <span className="stats-card__label">Total crises</span>
-          <strong className="stats-card__value">{summary.current}</strong>
+          <div className="stats-card__value-row">
+            <strong className="stats-card__value">{summary.current}</strong>
+            <span className="stats-card__severe">dont {summary.currentSevere} grave(s)</span>
+          </div>
         </div>
 
         <div
@@ -243,7 +246,6 @@ function StatsTrendCard({
         </div>
       </div>
 
-      <p className="stats-card__comparison">Dont {summary.currentSevere} grave(s)</p>
       <p className="stats-card__comparison">Période précédente : {summary.previous} crise(s)</p>
     </article>
   );
