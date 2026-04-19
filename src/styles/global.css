@@ -435,6 +435,8 @@ h3 {
 
 .period-switcher--compact {
   grid-template-columns: minmax(0, auto) 1fr minmax(0, auto);
+  min-height: calc(2.45rem + var(--space-1) * 2);
+  padding: var(--space-1);
   align-items: center;
   gap: var(--space-2);
 }
@@ -447,7 +449,7 @@ h3 {
 .period-switcher__current strong {
   display: block;
   font-size: 1rem;
-  line-height: 1;
+  line-height: 1.1;
   white-space: nowrap;
 }
 
