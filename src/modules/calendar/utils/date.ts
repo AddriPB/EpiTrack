@@ -55,10 +55,12 @@ export function buildYearSummary(date: Date) {
 export function getCalendarDays(year: number, monthIndex: number) {
   const firstDay = new Date(year, monthIndex, 1);
   const firstWeekday = (firstDay.getDay() + 6) % 7;
+  const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+  const weeks = Math.ceil((firstWeekday + daysInMonth) / 7);
   const startDate = new Date(year, monthIndex, 1 - firstWeekday);
   const today = new Date();
 
-  return Array.from({ length: 42 }, (_, index) => {
+  return Array.from({ length: weeks * 7 }, (_, index) => {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + index);
     return {
