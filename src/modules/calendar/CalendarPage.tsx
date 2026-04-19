@@ -1,4 +1,4 @@
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, TouchEvent, useMemo, useRef, useState } from "react";
 import { YearSummaryGrid } from "./components/YearSummaryGrid";
 import { MonthCalendar } from "./components/MonthCalendar";
 import { useEpilepsyEvents } from "./hooks/useEpilepsyEvents";
@@ -28,8 +28,11 @@ type EditableDayEvent = {
   color: EventColor;
   observation: string;
 };
+type PeriodTransitionDirection = "forward" | "backward" | null;
 
 const DEFAULT_COLOR: EventColor = "yellow";
+const SWIPE_THRESHOLD_PX = 56;
+const SWIPE_VERTICAL_TOLERANCE_PX = 42;
 
 export function CalendarPage() {
   const { user } = useAuth();
@@ -41,8 +44,10 @@ export function CalendarPage() {
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventColor, setNewEventColor] = useState<EventColor>(DEFAULT_COLOR);
   const [newEventObservation, setNewEventObservation] = useState("");
+  const [periodTransitionDirection, setPeriodTransitionDirection] = useState<PeriodTransitionDirection>(null);
   const [modalBusy, setModalBusy] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
+  const touchStartRef = useRef<{ x: number; y: number } | null>(null);
   const { year, monthIndex } = currentMonth;
   const { events, loading, error, firebaseReady } = useEpilepsyEvents(year);
 
@@ -57,6 +62,11 @@ export function CalendarPage() {
   const previousStep = view === "month" ? -1 : -12;
   const nextStep = view === "month" ? 1 : 12;
 
+  function movePeriod(delta: number, direction: Exclude<PeriodTransitionDirection, null>) {
+    setPeriodTransitionDirection(direction);
+    setCurrentMonth((value) => shiftMonth(value.year, value.monthIndex, delta));
+  }
+
   function handleMonthSelect(monthKey: string) {
     const [selectedYear, selectedMonth] = monthKey.split("-");
     const parsedYear = Number.parseInt(selectedYear, 10);
@@ -70,6 +80,7 @@ export function CalendarPage() {
       year: parsedYear,
       monthIndex: parsedMonth - 1
     });
+    setPeriodTransitionDirection(parsedMonth - 1 >= monthIndex ? "forward" : "backward");
     setView("month");
   }
 
@@ -191,6 +202,34 @@ export function CalendarPage() {
     }
   }
 
+  function handleTouchStart(event: TouchEvent<HTMLElement>) {
+    const touch = event.changedTouches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+  }
+
+  function handleTouchEnd(event: TouchEvent<HTMLElement>) {
+    if (!touchStartRef.current || modalMode) {
+      touchStartRef.current = null;
+      return;
+    }
+
+    const touch = event.changedTouches[0];
+    const deltaX = touch.clientX - touchStartRef.current.x;
+    const deltaY = touch.clientY - touchStartRef.current.y;
+    touchStartRef.current = null;
+
+    if (Math.abs(deltaX) < SWIPE_THRESHOLD_PX || Math.abs(deltaY) > SWIPE_VERTICAL_TOLERANCE_PX) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      movePeriod(nextStep, "forward");
+      return;
+    }
+
+    movePeriod(previousStep, "backward");
+  }
+
   return (
     <section className="page-section page-section--fab-clearance">
       <div className="page-heading">
@@ -234,14 +273,19 @@ export function CalendarPage() {
       ) : null}
 
       {firebaseReady && !loading && !error ? (
-        <>
+        <div
+          key={`${view}-${year}-${monthIndex}`}
+          className={`calendar-period-content${
+            periodTransitionDirection ? ` calendar-period-content--${periodTransitionDirection}` : ""
+          }`}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+        >
           <div className="period-switcher period-switcher--compact" aria-label="Changer de période">
             <button
               type="button"
               className="ghost-button ghost-button--nav"
-              onClick={() =>
-                setCurrentMonth((value) => shiftMonth(value.year, value.monthIndex, previousStep))
-              }
+              onClick={() => movePeriod(previousStep, "backward")}
               aria-label={view === "month" ? "Afficher le mois précédent" : "Afficher l’année précédente"}
             >
               <span aria-hidden="true">←</span>
@@ -252,9 +296,7 @@ export function CalendarPage() {
             <button
               type="button"
               className="ghost-button ghost-button--nav"
-              onClick={() =>
-                setCurrentMonth((value) => shiftMonth(value.year, value.monthIndex, nextStep))
-              }
+              onClick={() => movePeriod(nextStep, "forward")}
               aria-label={view === "month" ? "Afficher le mois suivant" : "Afficher l’année suivante"}
             >
               <span aria-hidden="true">→</span>
@@ -278,7 +320,7 @@ export function CalendarPage() {
           ) : (
             <YearSummaryGrid year={year} months={yearSummary.months} onMonthSelect={handleMonthSelect} />
           )}
-        </>
+        </div>
       ) : null}
 
       {modalMode && activeDay ? (

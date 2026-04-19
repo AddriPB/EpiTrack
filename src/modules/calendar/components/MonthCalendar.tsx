@@ -2,7 +2,6 @@ import { useRef } from "react";
 import { getCalendarDays, getMonthLabelShort, getWeekdayLabels } from "../utils/date";
 import { groupEventsByDay } from "../utils/aggregations";
 import { EpilepsyEvent } from "../../../shared/types/event";
-import { EmptyState } from "../../../shared/components/EmptyState";
 
 type MonthCalendarProps = {
   year: number;
@@ -103,12 +102,6 @@ export function MonthCalendar({
         })}
       </div>
 
-      {events.length === 0 ? (
-        <EmptyState
-          title="Aucune crise ce mois-ci"
-          description="Utilisez le bouton + pour ajouter une première entrée."
-        />
-      ) : null}
     </div>
   );
 }
