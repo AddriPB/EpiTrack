@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { getCalendarDays, getMonthLabelShort, getWeekdayLabels } from "../utils/date";
 import { groupEventsByDay } from "../utils/aggregations";
 import { EpilepsyEvent } from "../../../shared/types/event";
@@ -7,13 +8,21 @@ type MonthCalendarProps = {
   year: number;
   monthIndex: number;
   events: EpilepsyEvent[];
+  onDaySelect: (day: { dateKey: string; label: string; events: EpilepsyEvent[] }) => void;
   onDayLongPress: (day: { dateKey: string; label: string; events: EpilepsyEvent[] }) => void;
 };
 
-export function MonthCalendar({ year, monthIndex, events, onDayLongPress }: MonthCalendarProps) {
+export function MonthCalendar({
+  year,
+  monthIndex,
+  events,
+  onDaySelect,
+  onDayLongPress
+}: MonthCalendarProps) {
   const days = getCalendarDays(year, monthIndex);
   const weekdayLabels = getWeekdayLabels();
   const eventsByDay = groupEventsByDay(events);
+  const longPressedDaysRef = useRef(new Set<string>());
 
   return (
     <div className="calendar-card">
@@ -28,6 +37,11 @@ export function MonthCalendar({ year, monthIndex, events, onDayLongPress }: Mont
       <div className="calendar-grid" role="grid" aria-label={getMonthLabelShort(year, monthIndex)}>
         {days.map((day) => {
           const dayEvents = day.isCurrentMonth ? eventsByDay.get(day.day) ?? [] : [];
+          const dayPayload = {
+            dateKey: day.dateKey,
+            label: `${day.day} ${getMonthLabelShort(day.year, day.monthIndex)}`,
+            events: dayEvents
+          };
 
           return (
             <article
@@ -47,11 +61,8 @@ export function MonthCalendar({ year, monthIndex, events, onDayLongPress }: Mont
                 const article = event.currentTarget;
 
                 const timeoutId = window.setTimeout(() => {
-                  onDayLongPress({
-                    dateKey: day.dateKey,
-                    label: `${day.day} ${getMonthLabelShort(day.year, day.monthIndex)}`,
-                    events: dayEvents
-                  });
+                  longPressedDaysRef.current.add(day.dateKey);
+                  onDayLongPress(dayPayload);
                 }, 420);
 
                 const clearPress = () => {
@@ -63,6 +74,18 @@ export function MonthCalendar({ year, monthIndex, events, onDayLongPress }: Mont
                 article.addEventListener("pointerup", clearPress, { once: true });
                 article.addEventListener("pointerleave", clearPress, { once: true });
                 article.addEventListener("pointercancel", clearPress, { once: true });
+              }}
+              onClick={() => {
+                if (!day.isCurrentMonth) {
+                  return;
+                }
+
+                if (longPressedDaysRef.current.has(day.dateKey)) {
+                  longPressedDaysRef.current.delete(day.dateKey);
+                  return;
+                }
+
+                onDaySelect(dayPayload);
               }}
             >
               <span className="calendar-day__number">{day.day}</span>

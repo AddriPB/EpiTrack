@@ -1,13 +1,13 @@
 import { FormEvent, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { saveEpilepsyEvent } from "../../services/epilepsy-events/eventService";
-import { EVENT_COLORS } from "../../shared/constants/designTokens";
 import { EventColor } from "../../shared/types/event";
 import { formatInputDate } from "../../shared/utils/date";
 import { isFirebaseConfigured } from "../../services/firebase/config";
 import { ErrorState } from "../../shared/components/ErrorState";
 import { useAuth } from "../../services/auth/AuthContext";
 import { pushFlashNotice } from "../../shared/utils/flash";
+import { EventForm } from "./components/EventForm";
 
 const DEFAULT_COLOR: EventColor = "yellow";
 
@@ -86,67 +86,18 @@ export function AddEventPage() {
         </div>
       </div>
 
-      <form className="form-card form-card--entry" onSubmit={handleSubmit}>
-        <label className="field field--date">
-          <span>Date</span>
-          <input
-            type="date"
-            value={date}
-            onChange={(event) => setDate(event.target.value)}
-            required
-          />
-        </label>
-
-        <fieldset className="field fieldset fieldset--severity">
-          <legend>Gravité</legend>
-          <div className="color-picker" role="radiogroup" aria-label="Choisir une couleur">
-            {EVENT_COLORS.map((item) => (
-              <label
-                key={item.value}
-                className={`color-choice${color === item.value ? " color-choice--selected" : ""}`}
-              >
-                <input
-                  type="radio"
-                  name="color"
-                  value={item.value}
-                  checked={color === item.value}
-                  onChange={() => setColor(item.value)}
-                  className={`color-choice__input color-choice__input--${item.value}`}
-                />
-                <span className={`color-choice__label color-choice__label--${item.value}`}>
-                  {item.label}
-                </span>
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        <label className="field">
-          <span>Observation</span>
-          <textarea
-            rows={2}
-            value={observation}
-            onChange={(event) => setObservation(event.target.value)}
-            placeholder="Facultatif"
-          />
-        </label>
-
-        {error ? <p className="form-error">{error}</p> : null}
-
-        <div className="modal-actions">
-          <button
-            type="button"
-            className="ghost-button ghost-button--compact"
-            onClick={handleCancel}
-            disabled={saving}
-          >
-            Annuler
-          </button>
-          <button type="submit" className="primary-button primary-button--compact" disabled={saving}>
-            {saving ? "Enregistrement…" : "Enregistrer"}
-          </button>
-        </div>
-      </form>
+      <EventForm
+        date={date}
+        color={color}
+        observation={observation}
+        saving={saving}
+        error={error}
+        onDateChange={setDate}
+        onColorChange={setColor}
+        onObservationChange={setObservation}
+        onCancel={handleCancel}
+        onSubmit={handleSubmit}
+      />
     </section>
   );
 }

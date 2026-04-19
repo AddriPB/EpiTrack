@@ -10,6 +10,7 @@ import { ErrorState } from "../../shared/components/ErrorState";
 import { StatCards } from "../../shared/components/StatCards";
 import { Modal } from "../../shared/components/Modal";
 import {
+  saveEpilepsyEvent,
   deleteEpilepsyEvents,
   updateEpilepsyEvent
 } from "../../services/epilepsy-events/eventService";
@@ -17,15 +18,18 @@ import { CreateEpilepsyEventInput, EpilepsyEvent, EventColor } from "../../share
 import { useAuth } from "../../services/auth/AuthContext";
 import { EVENT_COLORS } from "../../shared/constants/designTokens";
 import { pushFlashNotice } from "../../shared/utils/flash";
+import { EventForm } from "../events/components/EventForm";
 
 type CalendarView = "month" | "year";
-type DayModalMode = "actions" | "edit" | "delete";
+type DayModalMode = "create" | "actions" | "edit" | "delete";
 type EditableDayEvent = {
   id: string;
   date: string;
   color: EventColor;
   observation: string;
 };
+
+const DEFAULT_COLOR: EventColor = "yellow";
 
 export function CalendarPage() {
   const { user } = useAuth();
@@ -34,6 +38,9 @@ export function CalendarPage() {
   const [modalMode, setModalMode] = useState<DayModalMode | null>(null);
   const [activeDay, setActiveDay] = useState<{ label: string; events: EpilepsyEvent[] } | null>(null);
   const [editableEvents, setEditableEvents] = useState<EditableDayEvent[]>([]);
+  const [newEventDate, setNewEventDate] = useState("");
+  const [newEventColor, setNewEventColor] = useState<EventColor>(DEFAULT_COLOR);
+  const [newEventObservation, setNewEventObservation] = useState("");
   const [modalBusy, setModalBusy] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
   const { year, monthIndex } = currentMonth;
@@ -54,7 +61,20 @@ export function CalendarPage() {
     setModalMode(null);
     setActiveDay(null);
     setEditableEvents([]);
+    setNewEventDate("");
+    setNewEventColor(DEFAULT_COLOR);
+    setNewEventObservation("");
     setModalBusy(false);
+    setModalError(null);
+  }
+
+  function openCreateModal(day: { dateKey: string; label: string; events: EpilepsyEvent[] }) {
+    setActiveDay(day);
+    setEditableEvents([]);
+    setNewEventDate(day.dateKey);
+    setNewEventColor(DEFAULT_COLOR);
+    setNewEventObservation("");
+    setModalMode("create");
     setModalError(null);
   }
 
@@ -70,6 +90,31 @@ export function CalendarPage() {
     );
     setModalMode("actions");
     setModalError(null);
+  }
+
+  async function handleCreateEvent(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    if (!user || !activeDay) {
+      setModalError("Connexion requise.");
+      return;
+    }
+
+    setModalBusy(true);
+    setModalError(null);
+
+    try {
+      await saveEpilepsyEvent(user.uid, {
+        date: newEventDate,
+        color: newEventColor,
+        observation: newEventObservation.trim() || undefined
+      });
+      pushFlashNotice("Crise enregistrée");
+      closeModal();
+    } catch (submissionError) {
+      setModalError(submissionError instanceof Error ? submissionError.message : "Enregistrement impossible.");
+      setModalBusy(false);
+    }
   }
 
   function updateEditableEvent(id: string, patch: Partial<EditableDayEvent>) {
@@ -211,6 +256,7 @@ export function CalendarPage() {
               year={year}
               monthIndex={monthIndex}
               events={monthSummary.events}
+              onDaySelect={openCreateModal}
               onDayLongPress={openDayActions}
             />
           ) : (
@@ -222,7 +268,9 @@ export function CalendarPage() {
       {modalMode && activeDay ? (
         <Modal
           title={
-            modalMode === "actions"
+            modalMode === "create"
+              ? `Nouvelle crise du ${activeDay.label}`
+              : modalMode === "actions"
               ? `Crises du ${activeDay.label}`
               : modalMode === "edit"
                 ? `Modifier les crises du ${activeDay.label}`
@@ -231,6 +279,21 @@ export function CalendarPage() {
           onClose={closeModal}
           showCloseButton={false}
         >
+          {modalMode === "create" ? (
+            <EventForm
+              date={newEventDate}
+              color={newEventColor}
+              observation={newEventObservation}
+              saving={modalBusy}
+              error={modalError}
+              onDateChange={setNewEventDate}
+              onColorChange={setNewEventColor}
+              onObservationChange={setNewEventObservation}
+              onCancel={closeModal}
+              onSubmit={(event) => void handleCreateEvent(event)}
+            />
+          ) : null}
+
           {modalMode === "actions" ? (
             <div className="modal-stack">
               <p className="modal-text">
