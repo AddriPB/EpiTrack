@@ -24,6 +24,7 @@
   --color-data-yellow: #d9b347;
   --color-data-orange: #d98449;
   --color-data-red: #d16d71;
+  --color-data-green: #69c28f;
   --color-state-success: #2f8f5b;
   --color-state-success-soft: #183b2a;
   --color-state-danger: #b54848;
@@ -581,6 +582,30 @@ h3 {
   font-size: 0.66rem;
   line-height: 1.1;
   white-space: nowrap;
+}
+
+.stat-card__label--split {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  white-space: normal;
+}
+
+.severity-label {
+  font-weight: 650;
+}
+
+.severity-label--green {
+  color: var(--color-data-green);
+}
+
+.severity-label--yellow {
+  color: var(--color-data-yellow);
+}
+
+.severity-label--red {
+  color: var(--color-data-red);
 }
 
 .stat-card--amber::before {
@@ -1269,11 +1294,11 @@ h3 {
 }
 
 .color-choice__input--yellow {
-  accent-color: var(--color-data-yellow);
+  accent-color: var(--color-data-green);
 }
 
 .color-choice__input--orange {
-  accent-color: var(--color-data-orange);
+  accent-color: var(--color-data-yellow);
 }
 
 .color-choice__input--red {
@@ -1299,11 +1324,11 @@ h3 {
 }
 
 .color-choice__label--yellow {
-  color: var(--color-data-yellow);
+  color: var(--color-data-green);
 }
 
 .color-choice__label--orange {
-  color: var(--color-data-orange);
+  color: var(--color-data-yellow);
 }
 
 .color-choice__label--red {
