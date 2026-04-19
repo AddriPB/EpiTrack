@@ -195,7 +195,7 @@ export function CalendarPage() {
     <section className="page-section page-section--fab-clearance">
       <div className="page-heading">
         <div>
-          <h2>{title}</h2>
+          <h2>Calendrier</h2>
         </div>
 
         <div className="segmented-control" role="tablist" aria-label="Choisir une vue">
