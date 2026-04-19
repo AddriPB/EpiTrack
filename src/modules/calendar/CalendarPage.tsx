@@ -57,6 +57,22 @@ export function CalendarPage() {
   const previousStep = view === "month" ? -1 : -12;
   const nextStep = view === "month" ? 1 : 12;
 
+  function handleMonthSelect(monthKey: string) {
+    const [selectedYear, selectedMonth] = monthKey.split("-");
+    const parsedYear = Number.parseInt(selectedYear, 10);
+    const parsedMonth = Number.parseInt(selectedMonth, 10);
+
+    if (Number.isNaN(parsedYear) || Number.isNaN(parsedMonth)) {
+      return;
+    }
+
+    setCurrentMonth({
+      year: parsedYear,
+      monthIndex: parsedMonth - 1
+    });
+    setView("month");
+  }
+
   function closeModal() {
     setModalMode(null);
     setActiveDay(null);
@@ -260,7 +276,7 @@ export function CalendarPage() {
               onDayLongPress={openDayActions}
             />
           ) : (
-            <YearSummaryGrid year={year} months={yearSummary.months} />
+            <YearSummaryGrid year={year} months={yearSummary.months} onMonthSelect={handleMonthSelect} />
           )}
         </>
       ) : null}

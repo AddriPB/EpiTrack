@@ -3,9 +3,10 @@ import { MonthSummary } from "../../../shared/types/event";
 type YearSummaryGridProps = {
   year: number;
   months: MonthSummary[];
+  onMonthSelect: (monthKey: string) => void;
 };
 
-export function YearSummaryGrid({ year, months }: YearSummaryGridProps) {
+export function YearSummaryGrid({ year, months, onMonthSelect }: YearSummaryGridProps) {
   return (
     <section className="year-summary" aria-label={`Synthèse annuelle ${year}`}>
       <div className="year-summary__header">
@@ -14,13 +15,19 @@ export function YearSummaryGrid({ year, months }: YearSummaryGridProps) {
 
       <div className="year-grid">
         {months.map((month) => (
-          <article key={month.monthKey} className="year-card">
-            <p className="year-card__label">{month.label}</p>
-            <div className="year-card__summary">
+          <button
+            key={month.monthKey}
+            type="button"
+            className="year-card"
+            onClick={() => onMonthSelect(month.monthKey)}
+            aria-label={`Afficher ${month.label} ${year}`}
+          >
+            <span className="year-card__label">{month.label}</span>
+            <span className="year-card__summary">
               <strong className="year-card__value">{month.total}</strong>
               <span className="year-card__meta">crises</span>
-            </div>
-          </article>
+            </span>
+          </button>
         ))}
       </div>
     </section>

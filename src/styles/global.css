@@ -1013,10 +1013,25 @@ h3 {
   align-items: center;
   justify-content: space-between;
   gap: 0.4rem;
+  width: 100%;
   border-radius: var(--radius-lg);
   padding: 0.72rem 0.78rem;
   background: var(--color-surface-muted);
   border: 1px solid rgba(44, 57, 72, 0.96);
+  text-align: left;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease,
+    transform 160ms ease;
+}
+
+.year-card:hover {
+  background: rgba(34, 48, 67, 0.8);
+  border-color: rgba(64, 82, 103, 1);
+}
+
+.year-card:active {
+  transform: translateY(1px);
 }
 
 .year-card__label {
