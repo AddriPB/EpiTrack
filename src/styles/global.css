@@ -1101,6 +1101,22 @@ h3 {
   line-height: 1;
 }
 
+.year-card__value--green {
+  color: #69c28f;
+}
+
+.year-card__value--yellow {
+  color: var(--color-data-yellow);
+}
+
+.year-card__value--orange {
+  color: var(--color-data-orange);
+}
+
+.year-card__value--red {
+  color: var(--color-data-red);
+}
+
 .field {
   display: grid;
   gap: 0.35rem;

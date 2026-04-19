@@ -24,7 +24,9 @@ export function YearSummaryGrid({ year, months, onMonthSelect }: YearSummaryGrid
           >
             <span className="year-card__label">{month.label}</span>
             <span className="year-card__summary">
-              <strong className="year-card__value">{month.total}</strong>
+              <strong className={`year-card__value year-card__value--${getMonthTotalTone(month.total)}`}>
+                {month.total}
+              </strong>
               <span className="year-card__meta">crises</span>
             </span>
           </button>
@@ -32,4 +34,20 @@ export function YearSummaryGrid({ year, months, onMonthSelect }: YearSummaryGrid
       </div>
     </section>
   );
+}
+
+function getMonthTotalTone(total: number) {
+  if (total === 0) {
+    return "green";
+  }
+
+  if (total === 1) {
+    return "yellow";
+  }
+
+  if (total <= 3) {
+    return "orange";
+  }
+
+  return "red";
 }
