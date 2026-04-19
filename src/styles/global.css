@@ -556,7 +556,7 @@ h3 {
 .stat-card {
   position: relative;
   border-radius: var(--radius-lg);
-  padding: 0.78rem 0.78rem 0.82rem;
+  padding: 0.62rem 0.7rem 0.68rem;
   overflow: hidden;
 }
 
@@ -571,41 +571,17 @@ h3 {
 
 .stat-card strong {
   display: block;
-  margin-top: 0.38rem;
-  font-size: 1.34rem;
+  margin-top: 0.28rem;
+  font-size: 1.2rem;
   line-height: 1;
 }
 
 .stat-card__label {
   display: block;
   color: var(--color-text-soft);
-  font-size: 0.66rem;
+  font-size: 0.64rem;
   line-height: 1.1;
   white-space: nowrap;
-}
-
-.stat-card__label--split {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-  white-space: normal;
-}
-
-.severity-label {
-  font-weight: 650;
-}
-
-.severity-label--green {
-  color: var(--color-data-green);
-}
-
-.severity-label--yellow {
-  color: var(--color-data-yellow);
-}
-
-.severity-label--red {
-  color: var(--color-data-red);
 }
 
 .stat-card--amber::before {
