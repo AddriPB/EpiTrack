@@ -131,7 +131,7 @@ export function CalendarPage() {
   }
 
   return (
-    <section className="page-section">
+    <section className="page-section page-section--fab-clearance">
       <div className="page-heading">
         <div>
           <h2>{title}</h2>

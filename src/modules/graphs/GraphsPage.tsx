@@ -99,7 +99,7 @@ export function GraphsPage() {
   }
 
   return (
-    <section className="page-section">
+    <section className="page-section page-section--fab-clearance">
       <div className="page-heading page-heading--compact">
         <div>
           <h2>Statistiques</h2>

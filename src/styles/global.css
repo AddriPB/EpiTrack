@@ -211,6 +211,10 @@ h3 {
   max-width: 36rem;
 }
 
+.page-section--fab-clearance {
+  padding-bottom: calc(7.5rem + env(safe-area-inset-bottom));
+}
+
 .entry-page {
   max-width: 21rem;
 }
