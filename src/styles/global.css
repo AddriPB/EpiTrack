@@ -348,10 +348,13 @@ h3 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2.1rem;
-  min-height: 2.1rem;
-  padding: 0.25rem;
-  border-radius: 0.7rem;
+  width: 1.85rem;
+  min-width: 1.85rem;
+  height: 1.85rem;
+  min-height: 1.85rem;
+  padding: 0;
+  border-radius: 0.58rem;
+  flex-shrink: 0;
   gap: 0;
 }
 
