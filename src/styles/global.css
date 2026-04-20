@@ -1342,21 +1342,6 @@ h3 {
   text-decoration: none;
 }
 
-.color-choice:has(.color-choice__input--yellow) {
-  background: rgba(34, 66, 47, 0.22);
-  border-color: rgba(105, 194, 143, 0.2);
-}
-
-.color-choice:has(.color-choice__input--orange) {
-  background: rgba(90, 74, 20, 0.26);
-  border-color: rgba(217, 179, 71, 0.22);
-}
-
-.color-choice:has(.color-choice__input--red) {
-  background: rgba(84, 34, 42, 0.24);
-  border-color: rgba(209, 109, 113, 0.22);
-}
-
 .color-choice__label--yellow {
   color: var(--color-data-green);
 }
@@ -1367,21 +1352,6 @@ h3 {
 
 .color-choice__label--red {
   color: var(--color-data-red);
-}
-
-.color-choice--selected:has(.color-choice__input--yellow) {
-  border-color: rgba(105, 194, 143, 0.38);
-  background: rgba(34, 66, 47, 0.34);
-}
-
-.color-choice--selected:has(.color-choice__input--orange) {
-  border-color: rgba(217, 179, 71, 0.42);
-  background: rgba(90, 74, 20, 0.36);
-}
-
-.color-choice--selected:has(.color-choice__input--red) {
-  border-color: rgba(209, 109, 113, 0.42);
-  background: rgba(84, 34, 42, 0.34);
 }
 
 .form-error {
