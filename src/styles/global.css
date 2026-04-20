@@ -1293,14 +1293,16 @@ h3 {
   justify-content: center;
   min-height: 2.2rem;
   padding: 0.2rem 0.45rem;
-  background: rgba(15, 22, 32, 0.42);
+  background: rgba(15, 22, 32, 0.68);
   border: 1px solid rgba(95, 114, 137, 0.14);
   border-radius: 0.88rem;
   position: relative;
 }
 
 .color-choice--selected {
-  box-shadow: inset 0 0 0 1px rgba(237, 243, 251, 0.08);
+  box-shadow:
+    inset 0 0 0 1px rgba(237, 243, 251, 0.1),
+    0 8px 18px rgba(0, 0, 0, 0.12);
 }
 
 .color-choice input {
@@ -1326,17 +1328,33 @@ h3 {
   font-size: 0.84rem;
   line-height: 1;
   white-space: nowrap;
-  opacity: 0.8;
+  opacity: 1;
   transition:
     opacity 160ms ease,
     transform 160ms ease,
-    text-decoration-color 160ms ease;
+    text-decoration-color 160ms ease,
+    color 160ms ease;
 }
 
 .color-choice--selected .color-choice__label {
   opacity: 1;
   transform: translateY(-1px);
   text-decoration: none;
+}
+
+.color-choice:has(.color-choice__input--yellow) {
+  background: rgba(34, 66, 47, 0.22);
+  border-color: rgba(105, 194, 143, 0.2);
+}
+
+.color-choice:has(.color-choice__input--orange) {
+  background: rgba(90, 74, 20, 0.26);
+  border-color: rgba(217, 179, 71, 0.22);
+}
+
+.color-choice:has(.color-choice__input--red) {
+  background: rgba(84, 34, 42, 0.24);
+  border-color: rgba(209, 109, 113, 0.22);
 }
 
 .color-choice__label--yellow {
@@ -1349,6 +1367,21 @@ h3 {
 
 .color-choice__label--red {
   color: var(--color-data-red);
+}
+
+.color-choice--selected:has(.color-choice__input--yellow) {
+  border-color: rgba(105, 194, 143, 0.38);
+  background: rgba(34, 66, 47, 0.34);
+}
+
+.color-choice--selected:has(.color-choice__input--orange) {
+  border-color: rgba(217, 179, 71, 0.42);
+  background: rgba(90, 74, 20, 0.36);
+}
+
+.color-choice--selected:has(.color-choice__input--red) {
+  border-color: rgba(209, 109, 113, 0.42);
+  background: rgba(84, 34, 42, 0.34);
 }
 
 .form-error {
