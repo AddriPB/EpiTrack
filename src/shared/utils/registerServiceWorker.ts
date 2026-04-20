@@ -2,6 +2,7 @@ const UPDATE_EVENT = "epitrack:update-available";
 
 let pendingRegistration: ServiceWorkerRegistration | null = null;
 let refreshOnControllerChange = false;
+let registrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
 
 function announceUpdate(registration: ServiceWorkerRegistration) {
   pendingRegistration = registration;
@@ -19,7 +20,7 @@ function watchInstallingWorker(worker: ServiceWorker, registration: ServiceWorke
 export function registerServiceWorker() {
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
-      navigator.serviceWorker
+      registrationPromise = navigator.serviceWorker
         .register(`${import.meta.env.BASE_URL}sw.js`)
         .then((registration) => {
           if (registration.waiting) {
@@ -37,9 +38,11 @@ export function registerServiceWorker() {
               window.location.reload();
             }
           });
+
+          return registration;
         })
         .catch(() => {
-          return undefined;
+          return null;
         });
     });
   }
@@ -51,6 +54,23 @@ export function getServiceWorkerUpdateEventName() {
 
 export function hasPendingServiceWorkerUpdate() {
   return Boolean(pendingRegistration?.waiting);
+}
+
+export async function checkForServiceWorkerUpdate() {
+  const registration = await registrationPromise;
+
+  if (!registration) {
+    return false;
+  }
+
+  await registration.update();
+
+  if (registration.waiting) {
+    announceUpdate(registration);
+    return true;
+  }
+
+  return false;
 }
 
 export function applyServiceWorkerUpdate() {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import {
   applyServiceWorkerUpdate,
+  checkForServiceWorkerUpdate,
   hasPendingServiceWorkerUpdate,
   getServiceWorkerUpdateEventName
 } from "../utils/registerServiceWorker";
@@ -12,6 +13,12 @@ export function UpdateNotice() {
     function showNotice() {
       setVisible(true);
     }
+
+    void checkForServiceWorkerUpdate().then((hasUpdate) => {
+      if (hasUpdate) {
+        setVisible(true);
+      }
+    });
 
     window.addEventListener(getServiceWorkerUpdateEventName(), showNotice as EventListener);
 
