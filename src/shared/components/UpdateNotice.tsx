@@ -14,16 +14,39 @@ export function UpdateNotice() {
       setVisible(true);
     }
 
-    void checkForServiceWorkerUpdate().then((hasUpdate) => {
+    async function refreshUpdateStatus() {
+      const hasUpdate = await checkForServiceWorkerUpdate();
+
       if (hasUpdate) {
         setVisible(true);
       }
-    });
+    }
+
+    void refreshUpdateStatus();
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === "visible") {
+        void refreshUpdateStatus();
+      }
+    }
+
+    function handleWindowFocus() {
+      void refreshUpdateStatus();
+    }
+
+    const intervalId = window.setInterval(() => {
+      void refreshUpdateStatus();
+    }, 30000);
 
     window.addEventListener(getServiceWorkerUpdateEventName(), showNotice as EventListener);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleWindowFocus);
 
     return () => {
       window.removeEventListener(getServiceWorkerUpdateEventName(), showNotice as EventListener);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("focus", handleWindowFocus);
+      window.clearInterval(intervalId);
     };
   }, []);
 

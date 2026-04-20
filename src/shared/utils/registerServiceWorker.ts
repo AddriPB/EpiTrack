@@ -3,6 +3,7 @@ const UPDATE_EVENT = "epitrack:update-available";
 let pendingRegistration: ServiceWorkerRegistration | null = null;
 let refreshOnControllerChange = false;
 let registrationPromise: Promise<ServiceWorkerRegistration | null> | null = null;
+let serviceWorkerRegistered = false;
 
 function announceUpdate(registration: ServiceWorkerRegistration) {
   pendingRegistration = registration;
@@ -17,35 +18,49 @@ function watchInstallingWorker(worker: ServiceWorker, registration: ServiceWorke
   });
 }
 
-export function registerServiceWorker() {
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      registrationPromise = navigator.serviceWorker
-        .register(`${import.meta.env.BASE_URL}sw.js`)
-        .then((registration) => {
-          if (registration.waiting) {
-            announceUpdate(registration);
-          }
-
-          registration.addEventListener("updatefound", () => {
-            if (registration.installing) {
-              watchInstallingWorker(registration.installing, registration);
-            }
-          });
-
-          navigator.serviceWorker.addEventListener("controllerchange", () => {
-            if (refreshOnControllerChange) {
-              window.location.reload();
-            }
-          });
-
-          return registration;
-        })
-        .catch(() => {
-          return null;
-        });
-    });
+function registerNow() {
+  if (!("serviceWorker" in navigator) || serviceWorkerRegistered) {
+    return;
   }
+
+  serviceWorkerRegistered = true;
+  registrationPromise = navigator.serviceWorker
+    .register(`${import.meta.env.BASE_URL}sw.js`)
+    .then((registration) => {
+      if (registration.waiting) {
+        announceUpdate(registration);
+      }
+
+      registration.addEventListener("updatefound", () => {
+        if (registration.installing) {
+          watchInstallingWorker(registration.installing, registration);
+        }
+      });
+
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (refreshOnControllerChange) {
+          window.location.reload();
+        }
+      });
+
+      return registration;
+    })
+    .catch(() => {
+      return null;
+    });
+}
+
+export function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) {
+    return;
+  }
+
+  if (document.readyState === "complete") {
+    registerNow();
+    return;
+  }
+
+  window.addEventListener("load", registerNow, { once: true });
 }
 
 export function getServiceWorkerUpdateEventName() {
@@ -57,6 +72,10 @@ export function hasPendingServiceWorkerUpdate() {
 }
 
 export async function checkForServiceWorkerUpdate() {
+  if (!registrationPromise && "serviceWorker" in navigator) {
+    registrationPromise = navigator.serviceWorker.getRegistration().then((registration) => registration ?? null);
+  }
+
   const registration = await registrationPromise;
 
   if (!registration) {
