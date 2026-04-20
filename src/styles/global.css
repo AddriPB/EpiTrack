@@ -1305,6 +1305,7 @@ h3 {
     0 8px 18px rgba(0, 0, 0, 0.12);
   background: rgba(24, 33, 45, 0.9);
   border-color: rgba(216, 228, 244, 0.18);
+  transform: translateY(-1px);
 }
 
 .color-choice input {
@@ -1344,6 +1345,7 @@ h3 {
   text-decoration: none;
   font-weight: 750;
   text-shadow: 0 0 0.35rem rgba(255, 255, 255, 0.08);
+  filter: saturate(1.15) brightness(1.1);
 }
 
 .color-choice__label--yellow {

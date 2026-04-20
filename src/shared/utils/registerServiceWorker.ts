@@ -1,4 +1,5 @@
 const UPDATE_EVENT = "epitrack:update-available";
+const UPDATE_PENDING_KEY = "epitrack:update-pending";
 
 let pendingRegistration: ServiceWorkerRegistration | null = null;
 let refreshOnControllerChange = false;
@@ -7,6 +8,7 @@ let serviceWorkerRegistered = false;
 
 function announceUpdate(registration: ServiceWorkerRegistration) {
   pendingRegistration = registration;
+  window.sessionStorage.setItem(UPDATE_PENDING_KEY, "1");
   window.dispatchEvent(new CustomEvent(UPDATE_EVENT));
 }
 
@@ -68,7 +70,9 @@ export function getServiceWorkerUpdateEventName() {
 }
 
 export function hasPendingServiceWorkerUpdate() {
-  return Boolean(pendingRegistration?.waiting);
+  return Boolean(
+    pendingRegistration?.waiting || window.sessionStorage.getItem(UPDATE_PENDING_KEY) === "1"
+  );
 }
 
 export async function checkForServiceWorkerUpdate() {
@@ -93,6 +97,8 @@ export async function checkForServiceWorkerUpdate() {
 }
 
 export function applyServiceWorkerUpdate() {
+  window.sessionStorage.removeItem(UPDATE_PENDING_KEY);
+
   if (!pendingRegistration?.waiting) {
     window.location.reload();
     return;

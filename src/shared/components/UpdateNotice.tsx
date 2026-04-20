@@ -7,7 +7,13 @@ import {
 } from "../utils/registerServiceWorker";
 
 export function UpdateNotice() {
-  const [visible, setVisible] = useState(() => hasPendingServiceWorkerUpdate());
+  const [visible, setVisible] = useState(() => {
+    if (isLocalUpdateNoticeTest()) {
+      return true;
+    }
+
+    return hasPendingServiceWorkerUpdate();
+  });
 
   useEffect(() => {
     function showNotice() {
@@ -15,6 +21,11 @@ export function UpdateNotice() {
     }
 
     async function refreshUpdateStatus() {
+      if (isLocalUpdateNoticeTest()) {
+        setVisible(true);
+        return;
+      }
+
       const hasUpdate = await checkForServiceWorkerUpdate();
 
       if (hasUpdate) {
@@ -69,4 +80,15 @@ export function UpdateNotice() {
       </button>
     </div>
   );
+}
+
+function isLocalUpdateNoticeTest() {
+  const isLocalhost =
+    window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+
+  if (!isLocalhost) {
+    return false;
+  }
+
+  return new URLSearchParams(window.location.search).get("updateNoticeTest") === "1";
 }
