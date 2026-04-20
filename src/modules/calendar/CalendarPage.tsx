@@ -1,4 +1,5 @@
-import { FormEvent, TouchEvent, useMemo, useRef, useState } from "react";
+import { FormEvent, TouchEvent, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { YearSummaryGrid } from "./components/YearSummaryGrid";
 import { MonthCalendar } from "./components/MonthCalendar";
 import { useEpilepsyEvents } from "./hooks/useEpilepsyEvents";
@@ -36,6 +37,8 @@ const SWIPE_VERTICAL_TOLERANCE_PX = 42;
 
 export function CalendarPage() {
   const { user } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const [view, setView] = useState<CalendarView>("month");
   const [currentMonth, setCurrentMonth] = useState(() => buildYearSummary(new Date()));
   const [modalMode, setModalMode] = useState<DayModalMode | null>(null);
@@ -61,6 +64,10 @@ export function CalendarPage() {
   const title = view === "month" ? getMonthLabel(year, monthIndex) : String(year);
   const previousStep = view === "month" ? -1 : -12;
   const nextStep = view === "month" ? 1 : 12;
+
+  function buildDefaultCreateDate() {
+    return toInputDate(new Date());
+  }
 
   function movePeriod(delta: number, direction: Exclude<PeriodTransitionDirection, null>) {
     setPeriodTransitionDirection(direction);
@@ -103,6 +110,15 @@ export function CalendarPage() {
     setNewEventObservation("");
     setModalMode("create");
     setModalError(null);
+  }
+
+  function openQuickCreateModal() {
+    const defaultDate = buildDefaultCreateDate();
+    openCreateModal({
+      dateKey: defaultDate,
+      label: formatModalDateLabel(defaultDate),
+      events: []
+    });
   }
 
   function openDayActions(day: { dateKey: string; label: string; events: EpilepsyEvent[] }) {
@@ -229,6 +245,17 @@ export function CalendarPage() {
 
     movePeriod(previousStep, "backward");
   }
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+
+    if (params.get("action") !== "create") {
+      return;
+    }
+
+    openQuickCreateModal();
+    navigate("/calendar", { replace: true });
+  }, [location.search, navigate, view, year, monthIndex]);
 
   return (
     <section className="page-section page-section--fab-clearance">
@@ -483,4 +510,18 @@ export function CalendarPage() {
       ) : null}
     </section>
   );
+}
+
+function toInputDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatModalDateLabel(dateKey: string) {
+  const [year, month, day] = dateKey.split("-");
+
+  return `${Number.parseInt(day, 10)} ${getMonthLabel(Number.parseInt(year, 10), Number.parseInt(month, 10) - 1)}`;
 }

@@ -49,6 +49,10 @@ export function getServiceWorkerUpdateEventName() {
   return UPDATE_EVENT;
 }
 
+export function hasPendingServiceWorkerUpdate() {
+  return Boolean(pendingRegistration?.waiting);
+}
+
 export function applyServiceWorkerUpdate() {
   if (!pendingRegistration?.waiting) {
     window.location.reload();

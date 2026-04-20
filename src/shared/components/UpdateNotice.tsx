@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import {
   applyServiceWorkerUpdate,
+  hasPendingServiceWorkerUpdate,
   getServiceWorkerUpdateEventName
 } from "../utils/registerServiceWorker";
 
 export function UpdateNotice() {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(() => hasPendingServiceWorkerUpdate());
 
   useEffect(() => {
     function showNotice() {

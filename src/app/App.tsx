@@ -14,7 +14,11 @@ export function App() {
   const { user, loading, firebaseReady } = useAuth();
   const isAuthenticated = Boolean(user);
   const showFab = isAuthenticated && location.pathname !== "/add";
-  const fabTo = location.pathname === "/treatment" ? "/treatment?action=create" : "/add";
+  const fabTo = location.pathname === "/treatment"
+    ? "/treatment?action=create"
+    : location.pathname === "/calendar"
+      ? "/calendar?action=create"
+      : "/add";
   const fabLabel = location.pathname === "/treatment" ? "Ajouter un traitement" : "Nouvelle crise";
 
   useEffect(() => {
