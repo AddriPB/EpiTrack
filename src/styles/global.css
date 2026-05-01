@@ -1321,7 +1321,7 @@ h3 {
 }
 
 .field--date input {
-  width: min(100%, 15rem);
+  width: 100%;
 }
 
 .fieldset {
