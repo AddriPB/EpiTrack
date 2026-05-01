@@ -1402,16 +1402,28 @@ h3 {
   filter: saturate(1.15) brightness(1.1);
 }
 
-.color-choice__label--yellow {
+.color-choice .color-choice__label--yellow {
   color: var(--color-data-yellow);
 }
 
-.color-choice__label--orange {
+.color-choice .color-choice__label--orange {
   color: var(--color-data-orange);
 }
 
-.color-choice__label--red {
+.color-choice .color-choice__label--red {
   color: var(--color-data-red);
+}
+
+.color-choice--selected .color-choice__label--yellow {
+  color: #f2ca55;
+}
+
+.color-choice--selected .color-choice__label--orange {
+  color: #f29a54;
+}
+
+.color-choice--selected .color-choice__label--red {
+  color: #ec7b80;
 }
 
 .form-error {
