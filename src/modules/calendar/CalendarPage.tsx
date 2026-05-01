@@ -474,7 +474,10 @@ export function CalendarPage() {
                               onChange={() => updateEditableEvent(item.id, { color: choice.value })}
                               className={`color-choice__input color-choice__input--${choice.value}`}
                             />
-                            <span className={`color-choice__label color-choice__label--${choice.value}`}>
+                            <span
+                              className={`color-choice__label color-choice__label--${choice.value}`}
+                              style={{ color: choice.textColor }}
+                            >
                               {choice.label}
                             </span>
                           </label>

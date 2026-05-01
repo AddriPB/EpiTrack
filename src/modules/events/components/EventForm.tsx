@@ -55,7 +55,10 @@ export function EventForm({
                 onChange={() => onColorChange(item.value)}
                 className={`color-choice__input color-choice__input--${item.value}`}
               />
-              <span className={`color-choice__label color-choice__label--${item.value}`}>
+              <span
+                className={`color-choice__label color-choice__label--${item.value}`}
+                style={{ color: item.textColor }}
+              >
                 {item.label}
               </span>
             </label>
