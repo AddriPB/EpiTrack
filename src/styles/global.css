@@ -902,6 +902,38 @@ h3 {
   background: var(--color-data-red);
 }
 
+.treatment-marker {
+  position: relative;
+  display: inline-block;
+  width: var(--calendar-dot-size);
+  height: var(--calendar-dot-size);
+  border-radius: 999px;
+  background: var(--color-data-green);
+  border: 1px solid rgba(237, 243, 251, 0.18);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18);
+}
+
+.treatment-marker::before,
+.treatment-marker::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 999px;
+  background: #ffffff;
+  transform: translate(-50%, -50%);
+}
+
+.treatment-marker::before {
+  width: 58%;
+  height: 18%;
+}
+
+.treatment-marker::after {
+  width: 18%;
+  height: 58%;
+}
+
 .event-overflow {
   font-size: 0.66rem;
   font-weight: 700;
@@ -1107,6 +1139,28 @@ h3 {
   line-height: 1.15;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+.treatment-card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.treatment-card__date {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.38rem;
+  padding: 0.18rem 0.46rem;
+  border-radius: 999px;
+  background: rgba(105, 194, 143, 0.12);
+  border: 1px solid rgba(105, 194, 143, 0.26);
+  color: var(--color-data-green);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
 }
 
 .treatment-card__actions {
@@ -1315,11 +1369,11 @@ h3 {
 }
 
 .color-choice__input--yellow {
-  accent-color: var(--color-data-green);
+  accent-color: var(--color-data-yellow);
 }
 
 .color-choice__input--orange {
-  accent-color: var(--color-data-yellow);
+  accent-color: var(--color-data-orange);
 }
 
 .color-choice__input--red {
@@ -1349,11 +1403,11 @@ h3 {
 }
 
 .color-choice__label--yellow {
-  color: var(--color-data-green);
+  color: var(--color-data-yellow);
 }
 
 .color-choice__label--orange {
-  color: var(--color-data-yellow);
+  color: var(--color-data-orange);
 }
 
 .color-choice__label--red {

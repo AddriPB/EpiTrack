@@ -20,6 +20,8 @@ import { useAuth } from "../../services/auth/AuthContext";
 import { EVENT_COLORS } from "../../shared/constants/designTokens";
 import { pushFlashNotice } from "../../shared/utils/flash";
 import { EventForm } from "../events/components/EventForm";
+import { Treatment } from "../../shared/types/treatment";
+import { subscribeToTreatments } from "../../services/treatments/treatmentService";
 
 type CalendarView = "month" | "year";
 type DayModalMode = "create" | "actions" | "edit" | "delete";
@@ -44,6 +46,8 @@ export function CalendarPage() {
   const [modalMode, setModalMode] = useState<DayModalMode | null>(null);
   const [activeDay, setActiveDay] = useState<{ label: string; events: EpilepsyEvent[] } | null>(null);
   const [editableEvents, setEditableEvents] = useState<EditableDayEvent[]>([]);
+  const [treatments, setTreatments] = useState<Treatment[]>([]);
+  const [treatmentsError, setTreatmentsError] = useState<string | null>(null);
   const [newEventDate, setNewEventDate] = useState("");
   const [newEventColor, setNewEventColor] = useState<EventColor>(DEFAULT_COLOR);
   const [newEventObservation, setNewEventObservation] = useState("");
@@ -58,6 +62,10 @@ export function CalendarPage() {
   const monthSummary = useMemo(
     () => getMonthlySummary(events, monthRange.monthKey),
     [events, monthRange.monthKey]
+  );
+  const treatmentMarkers = useMemo(
+    () => treatments.filter((treatment) => treatment.startDate.startsWith(monthRange.monthKey)),
+    [treatments, monthRange.monthKey]
   );
   const yearSummary = useMemo(() => getYearlySummary(events, year), [events, year]);
 
@@ -247,6 +255,22 @@ export function CalendarPage() {
   }
 
   useEffect(() => {
+    if (!firebaseReady || !user) {
+      setTreatments([]);
+      setTreatmentsError(null);
+      return;
+    }
+
+    setTreatmentsError(null);
+
+    return subscribeToTreatments(
+      user.uid,
+      setTreatments,
+      setTreatmentsError
+    );
+  }, [firebaseReady, user]);
+
+  useEffect(() => {
     const params = new URLSearchParams(location.search);
 
     if (params.get("action") !== "create") {
@@ -298,6 +322,12 @@ export function CalendarPage() {
           description={error}
         />
       ) : null}
+      {firebaseReady && treatmentsError ? (
+        <ErrorState
+          title="Impossible de charger les traitements"
+          description={treatmentsError}
+        />
+      ) : null}
 
       {firebaseReady && !loading && !error ? (
         <div
@@ -341,6 +371,7 @@ export function CalendarPage() {
               year={year}
               monthIndex={monthIndex}
               events={monthSummary.events}
+              treatmentMarkers={treatmentMarkers}
               onDaySelect={openCreateModal}
               onDayLongPress={openDayActions}
             />

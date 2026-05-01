@@ -13,6 +13,7 @@ import { FirebaseError } from "firebase/app";
 import { Timestamp } from "firebase/firestore";
 import { getDb } from "../firebase/config";
 import { Treatment, TreatmentInput } from "../../shared/types/treatment";
+import { formatInputDate } from "../../shared/utils/date";
 
 const COLLECTION_NAME = "treatments";
 
@@ -28,6 +29,7 @@ export async function createTreatment(uid: string, input: TreatmentInput) {
   try {
     await addDoc(getTreatmentsCollection(uid), {
       name: input.name.trim(),
+      startDate: input.startDate,
       morningDose: input.morningDose.trim(),
       eveningDose: input.eveningDose.trim(),
       createdAt: serverTimestamp()
@@ -41,6 +43,7 @@ export async function updateTreatment(uid: string, treatmentId: string, input: T
   try {
     await updateDoc(getTreatmentDocument(uid, treatmentId), {
       name: input.name.trim(),
+      startDate: input.startDate,
       morningDose: input.morningDose.trim(),
       eveningDose: input.eveningDose.trim()
     });
@@ -73,6 +76,7 @@ export function subscribeToTreatments(
         return {
           id: entry.id,
           name: String(data.name ?? ""),
+          startDate: normalizeStartDate(data.startDate, data.createdAt),
           morningDose: String(data.morningDose ?? ""),
           eveningDose: String(data.eveningDose ?? ""),
           createdAt: serializeTimestamp(data.createdAt)
@@ -85,6 +89,18 @@ export function subscribeToTreatments(
       onError(toTreatmentError(error).message);
     }
   );
+}
+
+function normalizeStartDate(startDate: unknown, createdAt: unknown) {
+  if (typeof startDate === "string" && startDate.trim()) {
+    return startDate;
+  }
+
+  if (createdAt instanceof Timestamp) {
+    return formatInputDate(createdAt.toDate());
+  }
+
+  return "";
 }
 
 function serializeTimestamp(timestamp: unknown) {

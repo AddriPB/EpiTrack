@@ -1,3 +1,5 @@
+import { formatInputDate } from "../../../shared/utils/date";
+
 const monthFormatter = new Intl.DateTimeFormat("fr-FR", {
   month: "long",
   year: "numeric"
@@ -64,7 +66,7 @@ export function getCalendarDays(year: number, monthIndex: number) {
     const date = new Date(startDate);
     date.setDate(startDate.getDate() + index);
     return {
-      dateKey: date.toISOString(),
+      dateKey: formatInputDate(date),
       year: date.getFullYear(),
       monthIndex: date.getMonth(),
       day: date.getDate(),

@@ -15,6 +15,7 @@ import {
 } from "../../services/treatments/treatmentService";
 import { Treatment, TreatmentInput } from "../../shared/types/treatment";
 import { pushFlashNotice } from "../../shared/utils/flash";
+import { formatInputDate } from "../../shared/utils/date";
 
 type ModalState =
   | { mode: "create"; draft: TreatmentInput }
@@ -22,11 +23,14 @@ type ModalState =
   | { mode: "delete"; treatment: Treatment }
   | null;
 
-const EMPTY_DRAFT: TreatmentInput = {
-  name: "",
-  morningDose: "",
-  eveningDose: ""
-};
+function createEmptyDraft(): TreatmentInput {
+  return {
+    name: "",
+    startDate: formatInputDate(new Date()),
+    morningDose: "",
+    eveningDose: ""
+  };
+}
 
 export function TreatmentPage() {
   const { user } = useAuth();
@@ -112,7 +116,7 @@ export function TreatmentPage() {
 
   function openCreateModal() {
     setError(null);
-    setModalState({ mode: "create", draft: { ...EMPTY_DRAFT } });
+    setModalState({ mode: "create", draft: createEmptyDraft() });
   }
 
   function openEditModal(treatment: Treatment) {
@@ -122,6 +126,7 @@ export function TreatmentPage() {
       treatmentId: treatment.id,
       draft: {
         name: treatment.name,
+        startDate: treatment.startDate || formatInputDate(new Date()),
         morningDose: treatment.morningDose,
         eveningDose: treatment.eveningDose
       }
@@ -164,6 +169,11 @@ export function TreatmentPage() {
 
     if (!modalState.draft.name.trim()) {
       setError("Le nom du médicament est requis.");
+      return;
+    }
+
+    if (!modalState.draft.startDate) {
+      setError("La date de début est requise.");
       return;
     }
 
@@ -253,7 +263,14 @@ export function TreatmentPage() {
           >
             <div className="treatment-card__header">
               <div>
-                <h3 className="treatment-card__title">{treatment.name}</h3>
+                <div className="treatment-card__title-row">
+                  <h3 className="treatment-card__title">{treatment.name}</h3>
+                  {treatment.startDate ? (
+                    <time className="treatment-card__date" dateTime={treatment.startDate}>
+                      {formatTreatmentDate(treatment.startDate)}
+                    </time>
+                  ) : null}
+                </div>
               </div>
               <div className="treatment-card__actions">
                 <button
@@ -297,6 +314,16 @@ export function TreatmentPage() {
                 value={modalState.draft.name}
                 onChange={(event) => updateDraft("name", event.target.value)}
                 placeholder="Nom"
+              />
+            </label>
+
+            <label className="field">
+              <span>Date de début</span>
+              <input
+                type="date"
+                value={modalState.draft.startDate}
+                onChange={(event) => updateDraft("startDate", event.target.value)}
+                required
               />
             </label>
 
@@ -360,4 +387,14 @@ export function TreatmentPage() {
       ) : null}
     </section>
   );
+}
+
+function formatTreatmentDate(dateKey: string) {
+  const [year, month, day] = dateKey.split("-");
+
+  if (!year || !month || !day) {
+    return dateKey;
+  }
+
+  return `${day}/${month}/${year}`;
 }
