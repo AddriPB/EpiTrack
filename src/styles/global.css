@@ -1276,6 +1276,7 @@ h3 {
 .field {
   display: grid;
   gap: 0.42rem;
+  min-width: 0;
   width: 100%;
 }
 
@@ -1289,6 +1290,8 @@ h3 {
 .field input,
 .field textarea {
   width: 100%;
+  min-width: 0;
+  max-width: 100%;
   min-height: 2.72rem;
   padding: 0.72rem 0.84rem;
   border: 1px solid rgba(95, 114, 137, 0.2);
@@ -1321,6 +1324,8 @@ h3 {
 }
 
 .field--date input {
+  min-width: 0;
+  max-width: 100%;
   width: 100%;
 }
 
