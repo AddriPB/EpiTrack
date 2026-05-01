@@ -1289,8 +1289,13 @@ h3 {
 
 .field input,
 .field textarea {
+  display: block;
+  box-sizing: border-box;
+  inline-size: 100%;
   width: 100%;
   min-width: 0;
+  min-inline-size: 0;
+  max-inline-size: 100%;
   max-width: 100%;
   min-height: 2.72rem;
   padding: 0.72rem 0.84rem;
@@ -1320,13 +1325,26 @@ h3 {
 }
 
 .field--date {
+  overflow: hidden;
   width: 100%;
 }
 
 .field--date input {
+  -webkit-appearance: none;
+  appearance: none;
+  inline-size: 100%;
   min-width: 0;
+  min-inline-size: 0;
+  max-inline-size: 100%;
   max-width: 100%;
   width: 100%;
+}
+
+@supports (-webkit-touch-callout: none) {
+  .field--date input[type="date"] {
+    max-width: -webkit-fill-available;
+    width: -webkit-fill-available;
+  }
 }
 
 .fieldset {
