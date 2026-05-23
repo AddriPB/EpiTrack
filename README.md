@@ -35,10 +35,12 @@ Cette base sépare la logique métier, la persistance et l’UI. Elle permet d�
 ├── index.html
 ├── package.json
 ├── public/
-│   ├── favicon.svg
+│   ├── apple-touch-icon.png
+│   ├── favicon.png
 │   ├── manifest.webmanifest
-│   ├── pwa-192.svg
-│   ├── pwa-512.svg
+│   ├── maskable-icon-512.png
+│   ├── pwa-192.png
+│   ├── pwa-512.png
 │   └── sw.js
 ├── src/
 │   ├── app/
