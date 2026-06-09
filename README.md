@@ -21,7 +21,7 @@ PWA simple et maintenable pour suivre des crises d’épilepsie depuis un héber
 - `src/shared` : types, constantes, composants génériques, utilitaires
 - `src/styles` : design tokens et styles globaux
 
-Cette base sépare la logique métier, la persistance et l’UI. Elle permet d’ajouter plus tard statistiques, filtres, édition, suppression, profils ou paramètres sans refonte.
+Cette base sépare la logique métier, la persistance et l’UI. Elle permet d’ajouter plus tard statistiques, filtres, édition, profils ou paramètres sans refonte.
 
 ## Arborescence
 
@@ -112,6 +112,7 @@ Notes :
 - `monthKey` simplifie les regroupements mensuels
 - `year`, `month`, `day` facilitent les filtres et agrégats
 - plusieurs crises le même jour sont simplement plusieurs documents distincts
+- aucune règle TTL ou purge automatique n’est prévue : les crises et traitements restent conservés tant que l’utilisateur ne les supprime pas manuellement
 
 ## Installation
 
@@ -218,11 +219,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     match /users/{uid}/epilepsyEvents/{eventId} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, create, update, delete: if request.auth != null && request.auth.uid == uid;
     }
 
     match /users/{uid}/treatments/{treatmentId} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+      allow read, create, update, delete: if request.auth != null && request.auth.uid == uid;
     }
   }
 }
@@ -231,6 +232,7 @@ service cloud.firestore {
 Note :
 
 - sans la règle `treatments`, la création et la modification des traitements échouent avec `insufficient permissions`
+- les suppressions manuelles restent autorisées pour l’utilisateur propriétaire ; aucune suppression automatique n’est configurée
 
 ## Variables GitHub Actions à configurer
 
@@ -254,6 +256,8 @@ Note :
 - redirection directe vers l’espace personnel si l’utilisateur est déjà connecté
 - bouton de déconnexion dans le header
 - plusieurs crises possibles le même jour
+- conservation longue durée des crises et traitements, sans suppression automatique
+- suppression manuelle possible depuis l’interface utilisateur
 - vue mensuelle avec points colorés compacts dans chaque cellule
 - vue annuelle avec total par mois
 - totaux mois / année : `jaune + orange`, `rouge`, `global`
@@ -274,7 +278,7 @@ Note :
 
 ## Limites actuelles volontaires
 
-- pas d’édition / suppression
+- pas de suppression automatique des données de suivi
 - pas de statistiques détaillées
 - pas de mode hors-ligne complet, seulement un shell PWA minimal
 
